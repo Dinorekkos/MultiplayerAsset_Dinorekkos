@@ -1,4 +1,3 @@
 # NetcodeAsset_Dinorekkos
-Documentación de instalación
-Set up del proyecto
-- Inicializar proyecto vacío
+Documentación 
+https://docs.google.com/document/d/1r3d50_YPITZ3_oI3ALTBP5URPXscd6hiBoHWxG5x4Tw/edit?usp=sharing
