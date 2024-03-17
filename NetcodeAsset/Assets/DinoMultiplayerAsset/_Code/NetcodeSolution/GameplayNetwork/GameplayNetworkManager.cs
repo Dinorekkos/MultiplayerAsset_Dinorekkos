@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Dino.MultiplayerAsset
 {
-    public class AuthenticatorManager : MonoBehaviour
+    public class GameplayNetworkManager : MonoBehaviour
     {
        
     }
