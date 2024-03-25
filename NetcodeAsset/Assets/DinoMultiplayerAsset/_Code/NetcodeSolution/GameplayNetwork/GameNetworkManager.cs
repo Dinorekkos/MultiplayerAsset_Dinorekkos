@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Dino.MultiplayerAsset
 {
-    public class GameplayNetworkManager : MonoBehaviour
+    public class GameNetworkManager : MonoBehaviour
     {
        
     }

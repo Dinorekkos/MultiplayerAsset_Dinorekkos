@@ -9,6 +9,8 @@ public class LocalPlayer
     public CallbackValue<bool> IsHost = new CallbackValue<bool>(false);
     public CallbackValue<string> ID = new CallbackValue<string>(string.Empty);
     public CallbackValue<PlayerStatus> UserStatus = new CallbackValue<PlayerStatus>(PlayerStatus.None);
+    public CallbackValue<string> DisplayName = new CallbackValue<string>(string.Empty);
+
 
     public DateTime LastUpdate;
     

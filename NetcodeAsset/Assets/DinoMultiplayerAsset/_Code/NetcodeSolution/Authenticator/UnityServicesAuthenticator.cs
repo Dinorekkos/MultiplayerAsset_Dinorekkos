@@ -7,9 +7,14 @@ namespace Dino.MultiplayerAsset
 {
     public static class UnityServicesAuthenticator 
     {
-        const int initTimeout = 10000;
-        static bool IsSignedIn = false;
+        #region private properties
+        private const int initTimeout = 10000;
+        private static bool IsSignedIn = false;
+        #endregion
 
+        #region public methods
+
+        
 
         public static async Task<bool> TryInitServicesAsync(string profileName = null)
         {
@@ -72,6 +77,7 @@ namespace Dino.MultiplayerAsset
             }
         }
 
-        
+        #endregion
+    
     }
 }

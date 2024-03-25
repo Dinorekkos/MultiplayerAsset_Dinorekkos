@@ -9,4 +9,12 @@
         InGame = 8, // User is part of a "game" that has started.
         Menu = 16 // User is not in a lobby, in one of the main menus.
     }
+
+    public enum RequestType
+    {
+        Query = 0,
+        Join,
+        QuickJoin,
+        Host
+    }
 }
