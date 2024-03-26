@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
@@ -36,11 +38,10 @@ namespace Dino.MultiplayerAsset
         private ServiceRateLimiter _queryCooldown = new ServiceRateLimiter(1, 1f);
         private ServiceRateLimiter _quickJoinCooldown = new ServiceRateLimiter(1, 10f);
         private ServiceRateLimiter _createCooldown = new ServiceRateLimiter(2, 6f);
+        ServiceRateLimiter _heartBeatCooldown = new ServiceRateLimiter(5, 30);
 
+        private Task _heartBeatTask;
 
-
-        
-        
         #endregion
 
 
@@ -71,6 +72,80 @@ namespace Dino.MultiplayerAsset
 
             return _queryCooldown;
         }
+        
+        public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate,
+            LocalPlayer localUser, string password)
+        {
+            if (_createCooldown.IsCooingDown)
+            {
+                Debug.LogWarning("CreateLobbyAsync is on cooldown.");
+                return null;
+            }
+
+            await _createCooldown.QueueUntilCooldown();
+            string uasId = AuthenticationService.Instance.PlayerId;
+
+            CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
+            {
+                IsPrivate = isPrivate,
+                Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                Password = password
+            };
+            _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createLobbyOptions);
+            StartHeartBeat();
+            
+            return _currentLobby;
+        }
+
+        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser,
+            string password = null)
+        {
+            if(_joinCoolDown.IsCooingDown || (lobbyId == null && lobbyCode == null))
+            {
+                Debug.LogWarning("JoinLobbyAsync is on cooldown or lobbyId and lobbyCode are null.");
+                return null;
+            }
+
+            await _joinCoolDown.QueueUntilCooldown();
+            
+            string uasId = AuthenticationService.Instance.PlayerId;
+            var playerData = CreateInitialPlayerData(localUser);
+
+            if (!string.IsNullOrEmpty(lobbyId))
+            {
+                JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions
+                {
+                    Player = new Player(id: uasId, data: playerData), Password = password
+                };
+                _currentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, joinOptions);
+            }
+            else
+            {
+                JoinLobbyByCodeOptions joinOptions = new JoinLobbyByCodeOptions
+                {
+                    Player = new(id: uasId, data: playerData), Password = password
+                };
+                _currentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, joinOptions);
+            }
+
+            return _currentLobby;
+        }
+
+        public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser, LobbyColor lobbyColor)
+        {
+            //not queue on quickjoin 
+            if (_quickJoinCooldown.IsCooingDown)
+            {
+                Debug.LogWarning("Quick Join Lobby hit the rate limit.");
+                return null;
+            }
+
+            await _quickJoinCooldown.QueueUntilCooldown();
+            var filters = 
+        
+
+        }
+
         #endregion
 
         #region private methods
@@ -82,7 +157,58 @@ namespace Dino.MultiplayerAsset
             data.Add("DisplayName", displayNameObject);
             return data;
         }
+        
+        private List<QueryFilter> LobbyColorToFilter(LobbyColor limitColor)
+        {
+            List<QueryFilter> filters = new List<QueryFilter>();
 
+            switch (limitColor)
+            {
+                case LobbyColor.Orange:
+                    filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
+                    break;
+                case LobbyColor.Green:
+                    filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
+                    break;
+                case LobbyColor.Blue:
+                    filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+                    break;
+                    
+            }
+
+            return filters;
+            
+        }
+     
+
+        
+        
+        private void StartHeartBeat()
+        {
+#pragma warning disable 4014
+            _heartBeatTask = HeartBeatLoop();
+#pragma warning restore 4014
+        }
+        
+        private async Task HeartBeatLoop()
+        {
+            while (_currentLobby != null)
+            {
+                await SendHeartbeatPingAsync();
+                await Task.Delay(8000);
+            }
+        }
+        
+        private async Task SendHeartbeatPingAsync()
+        {
+            if(!InLobby()) return;
+
+            if (_heartBeatCooldown.IsCooingDown) return;
+
+            await _heartBeatCooldown.QueueUntilCooldown();
+            await LobbyService.Instance.SendHeartbeatPingAsync(_currentLobby.Id);
+        }
+        
         #endregion
 
         #region IDisposable
