@@ -18,26 +18,28 @@ namespace Dino.MultiplayerAsset
             get => _maxLobbiesToShow;
             set => _maxLobbiesToShow = value;
         }
+
         public Lobby CurrentLobby => _currentLobby;
 
         #endregion
-        
+
         #region private variables
-        
+
         private Lobby _currentLobby;
         private LobbyEventCallbacks _lobbyEventCallbacks = new LobbyEventCallbacks();
         private Task _heartbeatTask;
-        
+
         private int _maxLobbiesToShow = 10;
 
         private const string KEY_RELAYCODE = nameof(LocalLobby.RelayCode);
         private const string KEY_DISPLAYNAME = nameof(LocalPlayer.DisplayName);
         private const string KEY_USERSTATUS = nameof(LocalPlayer.UserStatus);
-        
+
         private ServiceRateLimiter _joinCoolDown = new ServiceRateLimiter(2, 6f);
         private ServiceRateLimiter _queryCooldown = new ServiceRateLimiter(1, 1f);
         private ServiceRateLimiter _quickJoinCooldown = new ServiceRateLimiter(1, 10f);
         private ServiceRateLimiter _createCooldown = new ServiceRateLimiter(2, 6f);
+        private ServiceRateLimiter _leaveLobbyOrRemovePlayer = new ServiceRateLimiter(5, 1);
         ServiceRateLimiter _heartBeatCooldown = new ServiceRateLimiter(5, 30);
 
         private Task _heartBeatTask;
@@ -54,6 +56,7 @@ namespace Dino.MultiplayerAsset
                 Debug.LogWarning("LobbyManager not currently in a lobby. Did you CreateLobbyAsync or JoinLobbyAsync?");
                 return false;
             }
+
             return true;
         }
 
@@ -67,12 +70,12 @@ namespace Dino.MultiplayerAsset
                     return _quickJoinCooldown;
                 case RequestType.Host:
                     return _createCooldown;
-                
+
             }
 
             return _queryCooldown;
         }
-        
+
         public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate,
             LocalPlayer localUser, string password)
         {
@@ -93,21 +96,21 @@ namespace Dino.MultiplayerAsset
             };
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createLobbyOptions);
             StartHeartBeat();
-            
+
             return _currentLobby;
         }
 
         public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser,
             string password = null)
         {
-            if(_joinCoolDown.IsCooingDown || (lobbyId == null && lobbyCode == null))
+            if (_joinCoolDown.IsCooingDown || (lobbyId == null && lobbyCode == null))
             {
                 Debug.LogWarning("JoinLobbyAsync is on cooldown or lobbyId and lobbyCode are null.");
                 return null;
             }
 
             await _joinCoolDown.QueueUntilCooldown();
-            
+
             string uasId = AuthenticationService.Instance.PlayerId;
             var playerData = CreateInitialPlayerData(localUser);
 
@@ -131,7 +134,7 @@ namespace Dino.MultiplayerAsset
             return _currentLobby;
         }
 
-        public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser, LobbyColor lobbyColor)
+        public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser, LobbyColor lobbyColor = LobbyColor.None)
         {
             //not queue on quickjoin 
             if (_quickJoinCooldown.IsCooingDown)
@@ -141,12 +144,106 @@ namespace Dino.MultiplayerAsset
             }
 
             await _quickJoinCooldown.QueueUntilCooldown();
-            var filters = 
-        
+            var filters = LobbyColorToFilter(lobbyColor);
+            string uasId = AuthenticationService.Instance.PlayerId;
+
+            var joinRequest = new QuickJoinLobbyOptions
+            {
+                Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                Filter = filters
+            };
+
+            return _currentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
 
         }
 
-        #endregion
+        public async Task BindLocalLobbyToRemote(string lobbyID, LocalLobby localLobby)
+        {
+            _lobbyEventCallbacks.LobbyDeleted += async () =>
+            {
+                await LeaveLobbyAsync();
+            };
+
+            _lobbyEventCallbacks.DataChanged += changes =>
+            {
+                foreach (var change in changes)
+                {
+                    var changedValue = change.Value;
+                    var changedKey = change.Key;
+                    
+                    if (changedKey == KEY_RELAYCODE)
+                        localLobby.RelayCode.Value = changedValue.Value.Value;
+
+                }
+            };
+            
+            _lobbyEventCallbacks.DataAdded += changes =>
+            {
+                foreach (var change in changes)
+                {
+                    var changedValue = change.Value;
+                    var changedKey = change.Key;
+                    
+                    if (changedKey == KEY_RELAYCODE)
+                        localLobby.RelayCode.Value = changedValue.Value.Value;
+
+                }
+            };
+            
+            _lobbyEventCallbacks.DataRemoved += changes =>
+            {
+                foreach (var change in changes)
+                {
+                    var changedValue = change.Value;
+                    var changedKey = change.Key;
+                    
+                    if (changedKey == KEY_RELAYCODE)
+                        localLobby.RelayCode.Value = "";
+                }
+            };
+
+            _lobbyEventCallbacks.PlayerLeft += players =>
+            {
+                foreach (var leftPlayerIndex in players)
+                {
+                    localLobby.RemovePlayer(leftPlayerIndex);
+                }
+
+            };
+
+            _lobbyEventCallbacks.PlayerJoined += players =>
+            {
+                foreach (var playerChanges in players)
+                {
+                    Player joinedPlayer = playerChanges.Player;
+                    var id = joinedPlayer.Id;
+                    var index = playerChanges.PlayerIndex;
+                    var isHost = localLobby.HostID.Value == id;
+
+                    var newPlayer = new LocalPlayer(id, index, isHost);
+
+                    foreach (var dataEntry in joinedPlayer.Data)
+                    {
+                        var dataObject = dataEntry.Value;
+                        ParseCustomPlayerData(newPlayer, dataEntry.Key, dataObject.Value);
+                    }
+
+                    localLobby.AddPlayer(index, newPlayer);
+                }
+            };
+
+        }
+
+        public async Task LeaveLobbyAsync()
+        {
+            await _leaveLobbyOrRemovePlayer.QueueUntilCooldown();
+            if(!InLobby()) return;
+            string playerId = AuthenticationService.Instance.PlayerId;
+            await LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, playerId);
+            Dispose();
+        }
+
+    #endregion
 
         #region private methods
 
@@ -179,7 +276,18 @@ namespace Dino.MultiplayerAsset
             return filters;
             
         }
-     
+
+        private void ParseCustomPlayerData(LocalPlayer player, string dataKey, string playerDataValue)
+        {
+            if (dataKey == KEY_USERSTATUS)
+            {
+                player.UserStatus.Value = (PlayerStatus)int.Parse(playerDataValue);
+            }
+            else if (dataKey == KEY_DISPLAYNAME)
+            {
+                player.DisplayName.Value = playerDataValue;
+            }
+        }
 
         
         
@@ -215,6 +323,8 @@ namespace Dino.MultiplayerAsset
         
         public void Dispose()
         {
+            _currentLobby = null;
+            _lobbyEventCallbacks = new LobbyEventCallbacks();
         }
         #endregion
 

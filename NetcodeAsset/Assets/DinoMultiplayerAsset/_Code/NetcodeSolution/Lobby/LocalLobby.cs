@@ -20,6 +20,7 @@ namespace Dino.MultiplayerAsset
         public CallbackValue<string> LobbyName = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> HostID = new CallbackValue<string>(string.Empty);
         public CallbackValue<long> LastUpdate = new CallbackValue<long>();
+        public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
         
         public int PlayerCount => _localPlayers.Count;
         public List<LocalPlayer> LocalPlayers => _localPlayers;
