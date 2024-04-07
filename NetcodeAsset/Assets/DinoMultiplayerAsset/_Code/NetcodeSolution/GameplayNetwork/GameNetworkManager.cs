@@ -35,6 +35,8 @@ namespace Dino.MultiplayerAsset
         private LocalPlayer _localUser;
         private LocalLobby _localLobby;
         private LobbyManager _lobbyManager;
+        private RelayManager _relayManager;
+        
         
 
         #endregion
@@ -56,6 +58,7 @@ namespace Dino.MultiplayerAsset
             _localUser = new LocalPlayer("", 0,false, "LocalPlayer");
             _localLobby = new LocalLobby {LocalLobbyState = {Value = LobbyState.Lobby}};
             _lobbyManager = new LobbyManager();
+            _relayManager = new RelayManager();
             
             await InitializeServices();
             AuthenticationPlayer();
@@ -84,11 +87,24 @@ namespace Dino.MultiplayerAsset
             
             Debug.Log($"Player ID: {_localUser.ID.Value} - Player Name: {_localUser.DisplayName.Value}");
         }
-        
+
+        private async void SendLocalLobbyData()
+        {
+            // await _lobbyManager.
+        }
 
         #endregion
-        
-        
-        
+
+
+        #region public Methods
+
+        public void HostSetRelayCode(string code)
+        {
+            _localLobby.RelayCode.Value = code;
+            SendLocalLobbyData();
+            
+        }
+
+        #endregion
     }
 }
