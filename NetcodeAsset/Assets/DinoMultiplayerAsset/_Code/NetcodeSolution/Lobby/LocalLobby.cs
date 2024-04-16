@@ -22,6 +22,9 @@ namespace Dino.MultiplayerAsset
         public CallbackValue<long> LastUpdate = new CallbackValue<long>();
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
         public CallbackValue<int> MaxPlayerCount = new CallbackValue<int>();
+        public CallbackValue<long> LastUpdated = new CallbackValue<long>();
+        public CallbackValue<bool> Private = new CallbackValue<bool>();
+        public CallbackValue<int> AvailableSlots = new CallbackValue<int>();
         
         public int PlayerCount => _localPlayers.Count;
         public List<LocalPlayer> LocalPlayers => _localPlayers;

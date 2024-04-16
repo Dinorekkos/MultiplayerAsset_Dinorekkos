@@ -41,6 +41,8 @@ namespace Dino.MultiplayerAsset
         private ServiceRateLimiter _createCooldown = new ServiceRateLimiter(2, 6f);
         private ServiceRateLimiter _leaveLobbyOrRemovePlayer = new ServiceRateLimiter(5, 1);
         ServiceRateLimiter _heartBeatCooldown = new ServiceRateLimiter(5, 30);
+        ServiceRateLimiter _updatePlayerCooldown = new ServiceRateLimiter(5, 5f);
+
 
         private Task _heartBeatTask;
 
@@ -241,6 +243,52 @@ namespace Dino.MultiplayerAsset
             string playerId = AuthenticationService.Instance.PlayerId;
             await LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, playerId);
             Dispose();
+        }
+
+        public async Task UpdateLobbyDataAsync(Dictionary<string, string> data)
+        {
+            if(!InLobby()) return;
+
+            Dictionary<string, DataObject> dataCurrent = _currentLobby.Data ?? new Dictionary<string, DataObject>();
+            var shouldLock = false;
+
+            foreach (var dataNew in data)
+            {
+                // DataObject.IndexOptions index = dataNew.Key == ""
+            }
+            
+        }
+        public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
+        {
+            if(!InLobby()) return;
+            
+            string playerId = AuthenticationService.Instance.PlayerId;
+            Dictionary<string, PlayerDataObject> dataCurrent = new Dictionary<string, PlayerDataObject>();
+            
+            foreach (var dataEntry in data)
+            {
+                PlayerDataObject dataObject = new PlayerDataObject(visibility: PlayerDataObject.VisibilityOptions.Member,
+                    value: dataEntry.Value);
+                
+                if(dataCurrent.ContainsKey(dataEntry.Key))
+                    dataCurrent[dataEntry.Key] = dataObject;
+                else
+                    dataCurrent.Add(dataEntry.Key, dataObject);
+            }
+            
+            if(_updatePlayerCooldown.TaskQueued) return;
+
+            await _updatePlayerCooldown.QueueUntilCooldown();
+            
+            UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
+            {
+                Data = dataCurrent,
+                AllocationId = null,
+                ConnectionInfo = null
+                
+            };
+            _currentLobby = await LobbyService.Instance.UpdatePlayerAsync(_currentLobby.Id, playerId, updateOptions);
+            
         }
 
     #endregion
