@@ -1,5 +1,6 @@
 # MultiplayerAsset_Dinorekkos
 Este es un Asset personalizado para la creación de juegos Multijugador usando las tecnologías de Unity Cloud. El asset busca facilitar el desarrollo e implementación de Unity Netcode para proyectos en desarrollo y equipos pequeños.
+Este proyecto toma de base la implementación del proyecto https://github.com/Unity-Technologies/com.unity.multiplayer.samples.coop  
 
 ## Documentación 
 Link de Documentación completa del sistema.
