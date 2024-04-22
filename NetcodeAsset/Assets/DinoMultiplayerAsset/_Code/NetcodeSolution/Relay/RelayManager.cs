@@ -13,7 +13,6 @@ namespace Dino.MultiplayerAsset
 {
     public class RelayManager : IDisposable
     {
-        
         public async Task AwaitRelayCode(LocalLobby lobby)
         {
             string relayCode = lobby.RelayCode.Value;

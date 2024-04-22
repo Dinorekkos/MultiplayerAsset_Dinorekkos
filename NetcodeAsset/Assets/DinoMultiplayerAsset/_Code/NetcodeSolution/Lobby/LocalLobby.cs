@@ -17,6 +17,7 @@ namespace Dino.MultiplayerAsset
         public CallbackValue<string> LobbyID = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> LobbyCode = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> RelayCode = new CallbackValue<string>(string.Empty);
+        public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
         public CallbackValue<string> LobbyName = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> HostID = new CallbackValue<string>(string.Empty);
         public CallbackValue<long> LastUpdate = new CallbackValue<long>();

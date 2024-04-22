@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using UnityEngine;
@@ -31,16 +32,26 @@ namespace Dino.MultiplayerAsset
         
         #endregion
 
+        #region public properties
+
+        public Action<GameState> onGameStateChanged;
+
+        #endregion
+
         #region private properties
         
         private LocalPlayer _localUser;
         private LocalLobby _localLobby;
         private LobbyManager _lobbyManager;
         private RelayManager _relayManager;
+        private LocalLobbyList _lobbyList;
+        
+        public GameState LocalGameState { get; private set; }
         
         
 
         #endregion
+        
         
         
         #region Unity Methods
@@ -104,7 +115,7 @@ namespace Dino.MultiplayerAsset
 
         private async void SendLocalLobbyData()
         {
-            
+            await _lobbyManager.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteLobbyData(_localLobby));
         }
         private async void SendLocalUserData()
         {
@@ -159,13 +170,61 @@ namespace Dino.MultiplayerAsset
 
         private void SetGameState(GameState state)
         {
-            throw new NotImplementedException();
+            var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu)
+                && LocalGameState == GameState.Lobby;
+            LocalGameState = state;
+            
+            Debug.Log("State Game Changed: ".SetColor("#93FFE8") + state);
+
+            if (isLeavingLobby)
+            {
+                LeaveLobby();
+            }
+        }
+
+        private void ResetLocalLobby()
+        {
+            _localLobby.ResetLobby();
+            _localLobby.RelayServer = null;
+        }
+
+        async Task CreateNetworkManager()
+        {
+            if (_localUser.IsHost.Value)
+            {
+                await _relayManager.SetRelayHostData(_localLobby);
+                NetworkManager.Singleton.StartHost();
+
+            }
+            else
+            {
+                await _relayManager.AwaitRelayCode(_localLobby);
+                await _relayManager.SetRelayClientData(_localLobby);
+                NetworkManager.Singleton.StartClient();
+            }
         }
         #endregion
 
 
         #region public Methods
 
+        public void StartNetworkedGame()
+        {
+#pragma warning disable 4014
+            CreateNetworkManager();
+#pragma warning restore 4014
+
+        }
+        public void LeaveLobby()
+        {
+            _localUser.ResetState();
+#pragma warning disable 4014
+            _lobbyManager.LeaveLobbyAsync();
+#pragma warning restore 4014
+            ResetLocalLobby();
+            _lobbyList.Clear();
+        }
+        
         public void HostSetRelayCode(string code)
         {
             _localLobby.RelayCode.Value = code;
