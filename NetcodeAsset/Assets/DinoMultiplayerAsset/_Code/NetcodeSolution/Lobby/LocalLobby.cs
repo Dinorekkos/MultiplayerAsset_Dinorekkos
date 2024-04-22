@@ -17,10 +17,15 @@ namespace Dino.MultiplayerAsset
         public CallbackValue<string> LobbyID = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> LobbyCode = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> RelayCode = new CallbackValue<string>(string.Empty);
+        public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
         public CallbackValue<string> LobbyName = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> HostID = new CallbackValue<string>(string.Empty);
         public CallbackValue<long> LastUpdate = new CallbackValue<long>();
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
+        public CallbackValue<int> MaxPlayerCount = new CallbackValue<int>();
+        public CallbackValue<long> LastUpdated = new CallbackValue<long>();
+        public CallbackValue<bool> Private = new CallbackValue<bool>();
+        public CallbackValue<int> AvailableSlots = new CallbackValue<int>();
         
         public int PlayerCount => _localPlayers.Count;
         public List<LocalPlayer> LocalPlayers => _localPlayers;
@@ -40,6 +45,7 @@ namespace Dino.MultiplayerAsset
             LobbyName.Value = "";
             LobbyID.Value = "";
             LobbyCode.Value = "";
+            MaxPlayerCount.Value = 4;
             
             OnUserJoined = null;
             OnUserLeft = null;
@@ -99,6 +105,8 @@ namespace Dino.MultiplayerAsset
             sb.AppendLine(new DateTime(LastUpdate.Value).ToString());
             sb.Append("RelayCode: ");
             sb.AppendLine(RelayCode.Value);
+            sb.Append("Max Player Count: ");
+            sb.AppendLine(MaxPlayerCount.Value.ToString());
             
             return base.ToString();
         }

@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Mono.CSharp;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using Enum = System.Enum;
 
 namespace Dino.MultiplayerAsset
 {
@@ -40,7 +42,9 @@ namespace Dino.MultiplayerAsset
         private ServiceRateLimiter _quickJoinCooldown = new ServiceRateLimiter(1, 10f);
         private ServiceRateLimiter _createCooldown = new ServiceRateLimiter(2, 6f);
         private ServiceRateLimiter _leaveLobbyOrRemovePlayer = new ServiceRateLimiter(5, 1);
-        ServiceRateLimiter _heartBeatCooldown = new ServiceRateLimiter(5, 30);
+        private ServiceRateLimiter _heartBeatCooldown = new ServiceRateLimiter(5, 30);
+        private ServiceRateLimiter _updatePlayerCooldown = new ServiceRateLimiter(5, 5f);
+        private ServiceRateLimiter _updateLobbyCooldown = new ServiceRateLimiter(5, 5f);
 
         private Task _heartBeatTask;
 
@@ -241,6 +245,74 @@ namespace Dino.MultiplayerAsset
             string playerId = AuthenticationService.Instance.PlayerId;
             await LobbyService.Instance.RemovePlayerAsync(_currentLobby.Id, playerId);
             Dispose();
+        }
+
+        public async Task UpdateLobbyDataAsync(Dictionary<string, string> data)
+        {
+            if(!InLobby()) return;
+
+            Dictionary<string, DataObject> dataCurrent = _currentLobby.Data ?? new Dictionary<string, DataObject>();
+            var shouldLock = false;
+
+            foreach (var dataNew in data)
+            {
+                // DataObject.IndexOptions index = dataNew.Key == ""
+                DataObject dataObject = new DataObject(DataObject.VisibilityOptions.Public, dataNew.Value);
+                
+                if (dataCurrent.ContainsKey(dataNew.Key))
+                    dataCurrent[dataNew.Key] = dataObject;
+                else
+                    dataCurrent.Add(dataNew.Key, dataObject);
+
+                if (dataNew.Key == "LocalLobbyState")
+                {
+                    Enum.TryParse(dataNew.Value, out LobbyState state);
+                    shouldLock = state != LobbyState.Lobby;
+                }
+
+                if (_updateLobbyCooldown.TaskQueued) return;
+                
+                await _updateLobbyCooldown.QueueUntilCooldown();
+                UpdateLobbyOptions updateLobbyOptions = new UpdateLobbyOptions
+                {
+                    Data = dataCurrent,
+                    IsLocked = shouldLock
+                };
+                _currentLobby = await LobbyService.Instance.UpdateLobbyAsync(_currentLobby.Id, updateLobbyOptions);
+            }
+            
+        }
+        public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
+        {
+            if(!InLobby()) return;
+            
+            string playerId = AuthenticationService.Instance.PlayerId;
+            Dictionary<string, PlayerDataObject> dataCurrent = new Dictionary<string, PlayerDataObject>();
+            
+            foreach (var dataEntry in data)
+            {
+                PlayerDataObject dataObject = new PlayerDataObject(visibility: PlayerDataObject.VisibilityOptions.Member,
+                    value: dataEntry.Value);
+                
+                if(dataCurrent.ContainsKey(dataEntry.Key))
+                    dataCurrent[dataEntry.Key] = dataObject;
+                else
+                    dataCurrent.Add(dataEntry.Key, dataObject);
+            }
+            
+            if(_updatePlayerCooldown.TaskQueued) return;
+
+            await _updatePlayerCooldown.QueueUntilCooldown();
+            
+            UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
+            {
+                Data = dataCurrent,
+                AllocationId = null,
+                ConnectionInfo = null
+                
+            };
+            _currentLobby = await LobbyService.Instance.UpdatePlayerAsync(_currentLobby.Id, playerId, updateOptions);
+            
         }
 
     #endregion

@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+#if UNITY_EDITOR
 using ParrelSync;
-using UnityEngine;
+#endif
 
 /// <summary>
 /// This class allows to name the to name a profile of a Clone editor if is using the tool ParrelSync
