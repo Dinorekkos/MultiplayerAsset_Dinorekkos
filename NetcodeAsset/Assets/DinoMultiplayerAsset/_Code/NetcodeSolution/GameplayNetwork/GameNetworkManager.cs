@@ -155,7 +155,20 @@ namespace Dino.MultiplayerAsset
         {
             await _lobbyManager.BindLocalLobbyToRemote(_localLobby.LobbyID.Value, _localLobby);
             _localLobby.LocalLobbyState.onChanged += OnLobbyStateChanged;
-            // SetLobbyView();
+            
+            SetLobbyView();
+        }
+
+        private void SetLobbyView()
+        {
+            SetGameState(GameState.Lobby);
+            SetLocalUserStatus(PlayerStatus.Lobby);
+        }
+
+        private void SetLocalUserStatus(PlayerStatus playerStatus)
+        {
+            _localUser.UserStatus.Value = playerStatus;
+            SendLocalUserData();
         }
 
         private async Task JoinLobby()

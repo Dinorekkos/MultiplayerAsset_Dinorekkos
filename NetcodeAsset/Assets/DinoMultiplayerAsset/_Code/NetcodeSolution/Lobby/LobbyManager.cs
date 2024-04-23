@@ -36,6 +36,7 @@ namespace Dino.MultiplayerAsset
         private const string KEY_RELAYCODE = nameof(LocalLobby.RelayCode);
         private const string KEY_DISPLAYNAME = nameof(LocalPlayer.DisplayName);
         private const string KEY_USERSTATUS = nameof(LocalPlayer.UserStatus);
+        private const string KEY_LOBBYSTATE = nameof(LocalLobby.LocalLobbyState);
 
         private ServiceRateLimiter _joinCoolDown = new ServiceRateLimiter(2, 6f);
         private ServiceRateLimiter _queryCooldown = new ServiceRateLimiter(1, 1f);
@@ -178,6 +179,9 @@ namespace Dino.MultiplayerAsset
                     if (changedKey == KEY_RELAYCODE)
                         localLobby.RelayCode.Value = changedValue.Value.Value;
 
+                    if (changedKey == KEY_LOBBYSTATE)
+                        localLobby.LocalLobbyState.Value = (LobbyState) int.Parse(changedValue.Value.Value);
+                    
                 }
             };
             
@@ -190,6 +194,9 @@ namespace Dino.MultiplayerAsset
                     
                     if (changedKey == KEY_RELAYCODE)
                         localLobby.RelayCode.Value = changedValue.Value.Value;
+                    
+                    if(changedKey == KEY_LOBBYSTATE)
+                        localLobby.LocalLobbyState.Value = (LobbyState)int.Parse(changedValue.Value.Value);
 
                 }
             };
@@ -198,7 +205,6 @@ namespace Dino.MultiplayerAsset
             {
                 foreach (var change in changes)
                 {
-                    var changedValue = change.Value;
                     var changedKey = change.Key;
                     
                     if (changedKey == KEY_RELAYCODE)
@@ -233,8 +239,66 @@ namespace Dino.MultiplayerAsset
                     }
 
                     localLobby.AddPlayer(index, newPlayer);
+                    Debug.Log($"Player {newPlayer.DisplayName.Value} joined at index {index}");
                 }
             };
+
+            _lobbyEventCallbacks.LobbyChanged += async changes =>
+            {
+                //Lobby Fields
+                if (changes.Name.Changed)
+                    localLobby.LobbyName.Value = changes.Name.Value;
+                if (changes.HostId.Changed)
+                    localLobby.HostID.Value = changes.HostId.Value;
+                if (changes.IsPrivate.Changed)
+                    localLobby.Private.Value = changes.IsPrivate.Value;
+                if (changes.IsLocked.Changed)
+                    localLobby.Locked.Value = changes.IsLocked.Value;
+                if (changes.AvailableSlots.Changed)
+                    localLobby.AvailableSlots.Value = changes.AvailableSlots.Value;
+                if (changes.MaxPlayers.Changed)
+                    localLobby.MaxPlayerCount.Value = changes.MaxPlayers.Value;
+
+                if (changes.LastUpdated.Changed)
+                    localLobby.LastUpdated.Value = changes.LastUpdated.Value.ToFileTimeUtc();
+
+                if (changes.PlayerData.Changed)
+                    PlayerDataChanged();
+
+                void PlayerDataChanged()
+                    {
+                        foreach (var lobbyPlayerChanges in changes.PlayerData.Value)
+                        {
+                            var playerIndex = lobbyPlayerChanges.Key;
+                            var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                            if (localPlayer == null) continue;
+
+                            var playerChanges = lobbyPlayerChanges.Value;
+                            if (playerChanges.ConnectionInfoChanged.Changed)
+                            {
+                                var connectionInfo = playerChanges.ConnectionInfoChanged.Value;
+                                Debug.Log($"ConnectionInfo for player {playerIndex} changed to {connectionInfo}");
+
+                            }
+
+                            if (playerChanges.LastUpdatedChanged.Changed) { }
+                        }
+                    }
+                
+            };
+            
+            _lobbyEventCallbacks.LobbyEventConnectionStateChanged += lobbyEventConnectionState =>
+            {
+                Debug.Log($"Lobby ConnectionState Changed to {lobbyEventConnectionState}");
+            };
+            
+            _lobbyEventCallbacks.KickedFromLobby += () =>
+            {
+                Debug.Log("Left Lobby");
+                Dispose();
+            };
+
+            await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, _lobbyEventCallbacks);
 
         }
 
