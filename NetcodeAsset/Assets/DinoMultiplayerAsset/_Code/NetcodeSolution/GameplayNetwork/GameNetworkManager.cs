@@ -245,7 +245,7 @@ namespace Dino.MultiplayerAsset
             
         }
         
-        public async void CreateLobby(string name, bool isPrivate, string password = null, int maxPlayers = 4)
+        public async void CreateLobby(string name, bool isPrivate, int maxPlayers = 4 , string password = null)
         {
             try
             {
