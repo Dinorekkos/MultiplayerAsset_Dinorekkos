@@ -241,6 +241,8 @@ namespace Dino.MultiplayerAsset
                     localLobby.AddPlayer(index, newPlayer);
                     Debug.Log($"Player {newPlayer.DisplayName.Value} joined at index {index}");
                 }
+                
+                Debug.Log("Player Joined");
             };
 
             _lobbyEventCallbacks.LobbyChanged += async changes =>
@@ -299,6 +301,8 @@ namespace Dino.MultiplayerAsset
             };
 
             await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, _lobbyEventCallbacks);
+            
+            Debug.Log("Subscribed to Lobby Events".SetColor("#F37219"));
 
         }
 
@@ -343,6 +347,8 @@ namespace Dino.MultiplayerAsset
                     IsLocked = shouldLock
                 };
                 _currentLobby = await LobbyService.Instance.UpdateLobbyAsync(_currentLobby.Id, updateLobbyOptions);
+                
+                Debug.Log("Lobby Data Updated".SetColor("#F37219") + _currentLobby.Players.Count);
             }
             
         }

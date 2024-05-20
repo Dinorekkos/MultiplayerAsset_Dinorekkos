@@ -6,6 +6,7 @@ using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Dino.MultiplayerAsset
 {
@@ -47,8 +48,7 @@ namespace Dino.MultiplayerAsset
         private LocalLobbyList _lobbyList;
         
         public GameState LocalGameState { get; private set; }
-        
-        
+        public LocalLobby LocalLobby => _localLobby;
 
         #endregion
         
@@ -60,19 +60,18 @@ namespace Dino.MultiplayerAsset
         {
             Initialize();
         }
-
-        private void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.C))
-            {
-                CreateLobby("TestLobby", false);
-            }
-            
-            if(Input.GetKeyDown(KeyCode.J))
-            {
-                QuickJoin();
-            }
-        }
+        // private void Update()
+        // {
+        //     if(Input.GetKeyDown(KeyCode.C))
+        //     {
+        //         CreateLobby("TestLobby", false);
+        //     }
+        //     
+        //     if(Input.GetKeyDown(KeyCode.J))
+        //     {
+        //         QuickJoin();
+        //     }
+        // }
 
         #endregion
 
@@ -287,6 +286,8 @@ namespace Dino.MultiplayerAsset
             var lobby = await _lobbyManager.QuickJoinLobbyAsync(_localUser);
             if(lobby != null)
             {
+                Debug.Log("Find Quick joined lobby");
+
                 LobbyConverters.RemoteToLocal(lobby, _localLobby);
                 await JoinLobby();
             }
@@ -294,6 +295,11 @@ namespace Dino.MultiplayerAsset
             {
                 SetGameState(GameState.JoinMenu);
             }
+        }
+        
+        public void LoadScene(string sceneName)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
 
       

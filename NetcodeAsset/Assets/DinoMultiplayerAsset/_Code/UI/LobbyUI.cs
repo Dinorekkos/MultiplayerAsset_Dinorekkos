@@ -10,6 +10,7 @@ public class LobbyUI : MonoBehaviour
 {
     [Header("Lobby UI")] 
     [SerializeField] private GameObject _initalButttons;
+    [SerializeField] private Button quickJoinButton;
     
     [Header("Create Lobby UI")]
     [SerializeField] private Button _GoCreateLobbyButton;
@@ -26,6 +27,9 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private GameObject _BrowseLobbyUI;
     [SerializeField] private Button _RefreshLobbiesButton;
     [SerializeField] private GameObject _LobbyList;
+    
+    [Header("InLobbyUI")]
+    [SerializeField] private GameObject _InLobbyUI;
     
     private bool _isPublic = false;
     private int _maxPlayersCount = 4;
@@ -44,6 +48,7 @@ public class LobbyUI : MonoBehaviour
             UpdatePublic();
         });
         
+        quickJoinButton.onClick.AddListener(QuickJoin);
         _CreateLobbyButton.onClick.AddListener(CreateLobby);
         
         _MaxPlayerSlider.value = _maxPlayersCount;
@@ -56,8 +61,20 @@ public class LobbyUI : MonoBehaviour
     private void CreateLobby()
     {
         _lobbyName = _LobbyNameInput.text;
-        GameNetworkManager.Instance.CreateLobby(_lobbyName, _isPublic, _maxPlayersCount);
+        
+        Debug.Log("Creating lobby with name: " + _lobbyName + " max players: " + _maxPlayersCount + " private: " + !_isPublic);
+        GameNetworkManager.Instance.CreateLobby(_lobbyName, !_isPublic, _maxPlayersCount);
+        EnableUIGameObjects(false, _CreateLobbyUI);
+        EnableUIGameObjects(true, _InLobbyUI);
     }
+
+    private void QuickJoin()
+    {
+        GameNetworkManager.Instance.QuickJoin();
+        EnableUIGameObjects(false, _initalButttons);
+        EnableUIGameObjects(true, _InLobbyUI);
+    }
+    
     private void ReturnToInitial()
     {
         EnableUIGameObjects(true, _initalButttons);
