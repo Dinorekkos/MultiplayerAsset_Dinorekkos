@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerLobbyUI : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private TextMeshProUGUI _NameTxt;
+    [SerializeField] private TextMeshProUGUI _isReadyTxt;
+    
+    public void SetName(string name)
     {
-        
+        _NameTxt.text = name;
     }
+    
+    public void SetReady(bool isReady)
+    {
+        _isReadyTxt.text = isReady ? "Ready" : "Not Ready";
+    }
+    
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }

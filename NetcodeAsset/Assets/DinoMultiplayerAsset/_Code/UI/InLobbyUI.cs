@@ -13,25 +13,31 @@ public class InLobbyUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _lobbyCodeTxt;
     [SerializeField] private TextMeshProUGUI _playerCount;
     [SerializeField] private TextMeshProUGUI _maxPlayerCount;
-    [SerializeField] private TextMeshProUGUI _readyPlayerText;
     [SerializeField] private Button _startGameButton;
+    [SerializeField] private GameObject _playerContainer;
+    [SerializeField] private GameObject _playerPrefab;
     
     LocalLobby _localLobby;
+    private int _currentPlayers;
     
     void Start()
     {
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
+        _startGameButton.onClick.AddListener(StartGame);
+        
     }
 
-    private void UpdatePlayerCount(LocalPlayer lobby)
+    private void UpdatePlayerCount(LocalPlayer localPlayer)
     {
-        int playerCount = GameNetworkManager.Instance.LocalLobby.PlayerCount;
-        int maxPlayerCount = GameNetworkManager.Instance.LocalLobby.MaxPlayerCount.Value;
+        _localLobby = GameNetworkManager.Instance.LocalLobby;
+        int playerCount = _localLobby.PlayerCount;
+        int maxPlayerCount = _localLobby.MaxPlayerCount.Value;
         _playerCount.text = playerCount + "/" + maxPlayerCount;
         
-        bool isPrivate = GameNetworkManager.Instance.LocalLobby.Private.Value;
+        bool isPrivate = _localLobby.Private.Value;
         UpdateLobbyCode(isPrivate);
+        UpdatePlayers();
     }
 
     private void UpdateLobbyName(string lobbyName)
@@ -51,14 +57,31 @@ public class InLobbyUI : MonoBehaviour
             _lobbyCodeTxt.text = GameNetworkManager.Instance.LocalLobby.LobbyCode.Value;
         }
         
-        Debug.Log("Lobby Code: ".SetColor("#F77820") + GameNetworkManager.Instance.LocalLobby.LobbyCode.Value);
+        // Debug.Log("Lobby Code: ".SetColor("#F77820") + GameNetworkManager.Instance.LocalLobby.LobbyCode.Value);
     }
 
 
     private void UpdatePlayers()
     {
+        foreach (Transform child in _playerContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
         
+        foreach (var player in _localLobby.LocalPlayers)
+        {
+            GameObject playerUI = Instantiate(_playerPrefab, _playerContainer.transform);
+            PlayerLobbyUI playerLobbyUI = playerUI.GetComponent<PlayerLobbyUI>();
+            playerLobbyUI.SetName(player.DisplayName.Value);
+            playerLobbyUI.SetReady(false);
+            Debug.Log("PLayer Status ".SetColor("#20D0F7") + player.UserStatus.Value);
+        }
         
+    }
+    
+    private void StartGame()
+    {
+        // GameNetworkManager.Instance.StartGame();
     }
    
 }

@@ -20,7 +20,6 @@ namespace Dino.MultiplayerAsset
         public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
         public CallbackValue<string> LobbyName = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> HostID = new CallbackValue<string>(string.Empty);
-        // public CallbackValue<long> LastUpdate = new CallbackValue<long>();
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
         public CallbackValue<int> MaxPlayerCount = new CallbackValue<int>();
         public CallbackValue<long> LastUpdated = new CallbackValue<long>();
@@ -47,7 +46,7 @@ namespace Dino.MultiplayerAsset
             LobbyName.Value = "";
             LobbyID.Value = "";
             LobbyCode.Value = "";
-            MaxPlayerCount.Value = 4;
+            MaxPlayerCount.Value = GameNetworkManager.Instance.NetworkSettings.MaxPlayerCount;
             
             OnUserJoined = null;
             OnUserLeft = null;

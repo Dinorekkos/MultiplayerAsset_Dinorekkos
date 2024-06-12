@@ -32,7 +32,7 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private GameObject _InLobbyUI;
     
     private bool _isPublic = false;
-    private int _maxPlayersCount = 4;
+    private int _maxPlayersCount;
     private string _lobbyName;
     void Start()
     {
@@ -51,10 +51,14 @@ public class LobbyUI : MonoBehaviour
         quickJoinButton.onClick.AddListener(QuickJoin);
         _CreateLobbyButton.onClick.AddListener(CreateLobby);
         
+        _maxPlayersCount = GameNetworkManager.Instance.NetworkSettings.MaxPlayerCount;
         _MaxPlayerSlider.value = _maxPlayersCount;
         UpdateMaxPlayersCount();
         
         UpdatePublic();
+        
+        EnableUIGameObjects(false, _InLobbyUI);
+        EnableUIGameObjects(false, _CreateLobbyUI);
         
     }
 
@@ -63,7 +67,7 @@ public class LobbyUI : MonoBehaviour
         _lobbyName = _LobbyNameInput.text;
         
         Debug.Log("Creating lobby with name: " + _lobbyName + " max players: " + _maxPlayersCount + " private: " + !_isPublic);
-        GameNetworkManager.Instance.CreateLobby(_lobbyName, !_isPublic, _maxPlayersCount);
+        GameNetworkManager.Instance.CreateLobby(_lobbyName, !_isPublic, (int)_MaxPlayerSlider.value);
         EnableUIGameObjects(false, _CreateLobbyUI);
         EnableUIGameObjects(true, _InLobbyUI);
     }

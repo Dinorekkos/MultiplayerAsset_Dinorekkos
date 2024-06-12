@@ -16,7 +16,6 @@ namespace Dino.MultiplayerAsset
     /// </summary>
     public class GameNetworkManager : MonoBehaviour
     {
-
         #region instance
         private static GameNetworkManager _instance;
         public static GameNetworkManager Instance
@@ -33,11 +32,12 @@ namespace Dino.MultiplayerAsset
         
         #endregion
 
-        #region public properties
+        #region SerializedFields
 
-        public Action<GameState> onGameStateChanged;
+        [SerializeField] private NetworkSettingsSO _networkSettings;
 
         #endregion
+
 
         #region private properties
         
@@ -46,11 +46,16 @@ namespace Dino.MultiplayerAsset
         private LobbyManager _lobbyManager;
         private RelayManager _relayManager;
         private LocalLobbyList _lobbyList;
-        
-        public GameState LocalGameState { get; private set; }
-        public LocalLobby LocalLobby => _localLobby;
-
         #endregion
+
+        #region public properties
+        
+        public Action<GameState> onGameStateChanged;
+        public GameState LocalGameState { get; private set; }
+        public NetworkSettingsSO NetworkSettings => _networkSettings;
+        public LocalLobby LocalLobby => _localLobby;
+        #endregion
+
         
         
         

@@ -17,8 +17,14 @@ namespace Dino.MultiplayerAsset
 
         public int MaxLobbiesToShow
         {
-            get => _maxLobbiesToShow;
-            set => _maxLobbiesToShow = value;
+            get
+            {
+                if (GameNetworkManager.Instance != null)
+                {
+                   return GameNetworkManager.Instance.NetworkSettings.MaxLobbiesToShow;
+                }
+                return 0;
+            }
         }
 
         public Lobby CurrentLobby => _currentLobby;
@@ -30,9 +36,7 @@ namespace Dino.MultiplayerAsset
         private Lobby _currentLobby;
         private LobbyEventCallbacks _lobbyEventCallbacks = new LobbyEventCallbacks();
         private Task _heartbeatTask;
-
-        private int _maxLobbiesToShow = 10;
-
+        
         private const string KEY_RELAYCODE = nameof(LocalLobby.RelayCode);
         private const string KEY_DISPLAYNAME = nameof(LocalPlayer.DisplayName);
         private const string KEY_USERSTATUS = nameof(LocalPlayer.UserStatus);
