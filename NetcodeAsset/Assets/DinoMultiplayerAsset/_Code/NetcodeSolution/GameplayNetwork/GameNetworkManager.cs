@@ -25,6 +25,7 @@ namespace Dino.MultiplayerAsset
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<GameNetworkManager>();
+                    DontDestroyOnLoad(_instance.gameObject);
                 }
                 return _instance;
             }
@@ -50,14 +51,12 @@ namespace Dino.MultiplayerAsset
 
         #region public properties
         
-        public Action<GameState> onGameStateChanged;
+        public Action<GameState> OnGameStateChanged;
         public GameState LocalGameState { get; private set; }
         public NetworkSettingsSO NetworkSettings => _networkSettings;
         public LocalLobby LocalLobby => _localLobby;
         #endregion
 
-        
-        
         
         #region Unity Methods
 
@@ -84,6 +83,9 @@ namespace Dino.MultiplayerAsset
 
         private async void Initialize()
         {
+            DontDestroyOnLoad(_instance.gameObject);
+
+            //Initialize the local player, local lobby, lobby manager, and relay manager.
             _localUser = new LocalPlayer("", 0,false, "LocalPlayer");
             _localLobby = new LocalLobby {LocalLobbyState = {Value = LobbyState.Lobby}};
             _lobbyManager = new LobbyManager();
@@ -190,7 +192,7 @@ namespace Dino.MultiplayerAsset
             var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu)
                 && LocalGameState == GameState.Lobby;
             LocalGameState = state;
-            
+            OnGameStateChanged?.Invoke(state);
             Debug.Log("State Game Changed: ".SetColor("#93FFE8") + state);
 
             if (isLeavingLobby)
@@ -292,12 +294,12 @@ namespace Dino.MultiplayerAsset
             if(lobby != null)
             {
                 Debug.Log("Find Quick joined lobby");
-
                 LobbyConverters.RemoteToLocal(lobby, _localLobby);
                 await JoinLobby();
             }
             else
             {
+                Debug.Log("No lobby found");
                 SetGameState(GameState.JoinMenu);
             }
         }

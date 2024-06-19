@@ -56,6 +56,12 @@ namespace Dino.MultiplayerAsset
         #endregion
 
 
+        #region public properties
+        
+        // public event Action 
+
+        #endregion
+
         #region public methods
 
         public bool InLobby()
@@ -152,17 +158,26 @@ namespace Dino.MultiplayerAsset
                 return null;
             }
 
-            await _quickJoinCooldown.QueueUntilCooldown();
-            var filters = LobbyColorToFilter(lobbyColor);
-            string uasId = AuthenticationService.Instance.PlayerId;
-
-            var joinRequest = new QuickJoinLobbyOptions
+            try
             {
-                Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
-                Filter = filters
-            };
+                await _quickJoinCooldown.QueueUntilCooldown();
+                var filters = LobbyColorToFilter(lobbyColor);
+                string uasId = AuthenticationService.Instance.PlayerId;
 
-            return _currentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
+                var joinRequest = new QuickJoinLobbyOptions
+                {
+                    Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                    Filter = filters
+                };
+
+                return _currentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("Quick Join Lobby failed. No lobby found." + e.Message);
+                return null;
+            }
+            
 
         }
 

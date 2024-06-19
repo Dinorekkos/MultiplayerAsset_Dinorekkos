@@ -60,23 +60,43 @@ public class LobbyUI : MonoBehaviour
         EnableUIGameObjects(false, _InLobbyUI);
         EnableUIGameObjects(false, _CreateLobbyUI);
         
+        GameNetworkManager.Instance.OnGameStateChanged += OnGameStateChanged;
+
+        
+    }
+
+    private void OnGameStateChanged(GameState state)
+    {
+        switch (state)
+        {
+            case GameState.JoinMenu:
+                ReturnToInitial();
+                break;
+            case GameState.Lobby:
+                EnterInLobby();
+                break;
+           
+        }
     }
 
     private void CreateLobby()
     {
         _lobbyName = _LobbyNameInput.text;
-        
         Debug.Log("Creating lobby with name: " + _lobbyName + " max players: " + _maxPlayersCount + " private: " + !_isPublic);
         GameNetworkManager.Instance.CreateLobby(_lobbyName, !_isPublic, (int)_MaxPlayerSlider.value);
-        EnableUIGameObjects(false, _CreateLobbyUI);
-        EnableUIGameObjects(true, _InLobbyUI);
     }
 
     private void QuickJoin()
     {
         GameNetworkManager.Instance.QuickJoin();
+    }
+    
+    private void EnterInLobby()
+    {
         EnableUIGameObjects(false, _initalButttons);
+        EnableUIGameObjects(false, _CreateLobbyUI);
         EnableUIGameObjects(true, _InLobbyUI);
+        Debug.Log("Entered in lobby UI");
     }
     
     private void ReturnToInitial()
