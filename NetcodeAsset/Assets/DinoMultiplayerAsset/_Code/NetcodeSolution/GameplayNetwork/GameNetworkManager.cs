@@ -34,8 +34,10 @@ namespace Dino.MultiplayerAsset
         #endregion
 
         #region SerializedFields
-
+        
+        [Header("Network Settings")]
         [SerializeField] private NetworkSettingsSO _networkSettings;
+        [SerializeField] private NetworkPrefabsList _networkPrefabsList;
 
         #endregion
 
@@ -83,7 +85,7 @@ namespace Dino.MultiplayerAsset
 
         private async void Initialize()
         {
-            DontDestroyOnLoad(_instance.gameObject);
+            DontDestroyOnLoad(this);
 
             //Initialize the local player, local lobby, lobby manager, and relay manager.
             _localUser = new LocalPlayer("", 0,false, "LocalPlayer");
@@ -248,7 +250,6 @@ namespace Dino.MultiplayerAsset
         {
             _localLobby.RelayCode.Value = code;
             SendLocalLobbyData();
-            
         }
         
         public async void CreateLobby(string name, bool isPrivate, int maxPlayers = 4 , string password = null)

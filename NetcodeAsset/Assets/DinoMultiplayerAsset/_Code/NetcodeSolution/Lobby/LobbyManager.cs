@@ -106,7 +106,7 @@ namespace Dino.MultiplayerAsset
             CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
-                Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                Player = new Unity.Services.Lobbies.Models.Player(id: uasId, data: CreateInitialPlayerData(localUser)),
                 Password = password
             };
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createLobbyOptions);
@@ -133,7 +133,7 @@ namespace Dino.MultiplayerAsset
             {
                 JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions
                 {
-                    Player = new Player(id: uasId, data: playerData), Password = password
+                    Player = new Unity.Services.Lobbies.Models.Player(id: uasId, data: playerData), Password = password
                 };
                 _currentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, joinOptions);
             }
@@ -166,7 +166,7 @@ namespace Dino.MultiplayerAsset
 
                 var joinRequest = new QuickJoinLobbyOptions
                 {
-                    Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                    Player = new Unity.Services.Lobbies.Models.Player(id: uasId, data: CreateInitialPlayerData(localUser)),
                     Filter = filters
                 };
 
@@ -244,7 +244,7 @@ namespace Dino.MultiplayerAsset
             {
                 foreach (var playerChanges in players)
                 {
-                    Player joinedPlayer = playerChanges.Player;
+                    Unity.Services.Lobbies.Models.Player joinedPlayer = playerChanges.Player;
                     var id = joinedPlayer.Id;
                     var index = playerChanges.PlayerIndex;
                     var isHost = localLobby.HostID.Value == id;

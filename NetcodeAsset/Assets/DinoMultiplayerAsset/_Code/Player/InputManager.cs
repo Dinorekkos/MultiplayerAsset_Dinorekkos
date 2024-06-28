@@ -21,7 +21,7 @@ public class InputManager : MonoBehaviour
         _movementAction = _playerInput.actions["Movement"];
         
     }
-
+    
     void Update()
     {
         MovementVector2 = _movementAction.ReadValue<Vector2>();
