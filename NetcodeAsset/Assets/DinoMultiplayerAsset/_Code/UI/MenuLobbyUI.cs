@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class LobbyUI : MonoBehaviour
+public class MenuLobbyUI : MonoBehaviour
 {
     [Header("Lobby UI")] 
     [SerializeField] private GameObject _initalButttons;

@@ -9,6 +9,9 @@ using UnityEngine.UI;
 
 public class InLobbyUI : MonoBehaviour
 {
+    
+    [Header("InLobbyUI")]
+    
     [SerializeField] private TextMeshProUGUI _lobbyNameTxt;
     [SerializeField] private TextMeshProUGUI _lobbyCodeTxt;
     [SerializeField] private TextMeshProUGUI _playerCount;
@@ -16,7 +19,8 @@ public class InLobbyUI : MonoBehaviour
     [SerializeField] private Button _startGameButton;
     [SerializeField] private GameObject _playerContainer;
     [SerializeField] private GameObject _playerPrefab;
-    
+    [SerializeField] private GameObject _container;
+
     LocalLobby _localLobby;
     private int _currentPlayers;
     
@@ -25,7 +29,8 @@ public class InLobbyUI : MonoBehaviour
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
         _startGameButton.onClick.AddListener(StartGame);
-        
+     
+        _container.SetActive(false);
     }
 
     private void UpdatePlayerCount(LocalPlayer localPlayer)
