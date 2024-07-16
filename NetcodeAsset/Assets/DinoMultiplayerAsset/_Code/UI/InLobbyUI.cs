@@ -9,6 +9,8 @@ using UnityEngine.UI;
 
 public class InLobbyUI : MonoBehaviour
 {
+    [Header("Game Events")]
+    [SerializeField] private GameEvent _onInitLobby;
     
     [Header("InLobbyUI")]
     
@@ -26,13 +28,23 @@ public class InLobbyUI : MonoBehaviour
     
     void Start()
     {
-        GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
-        GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
-        _startGameButton.onClick.AddListener(StartGame);
-     
+        _onInitLobby.OnEventRaised += InitLobby;
         _container.SetActive(false);
     }
 
+    private void Initialize()
+    {
+        GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
+        GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
+        _startGameButton.onClick.AddListener(StartGame);
+    }
+
+    private void InitLobby()
+    {
+        _container.SetActive(true);
+        Initialize();
+        
+    }
     private void UpdatePlayerCount(LocalPlayer localPlayer)
     {
         _localLobby = GameNetworkManager.Instance.LocalLobby;

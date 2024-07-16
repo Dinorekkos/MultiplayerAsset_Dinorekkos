@@ -149,7 +149,7 @@ namespace Dino.MultiplayerAsset
             return _currentLobby;
         }
 
-        public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser, LobbyColor lobbyColor = LobbyColor.None)
+        public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser)
         {
             //not queue on quickjoin 
             if (_quickJoinCooldown.IsCooingDown)
@@ -161,13 +161,11 @@ namespace Dino.MultiplayerAsset
             try
             {
                 await _quickJoinCooldown.QueueUntilCooldown();
-                var filters = LobbyColorToFilter(lobbyColor);
                 string uasId = AuthenticationService.Instance.PlayerId;
 
                 var joinRequest = new QuickJoinLobbyOptions
                 {
                     Player = new Unity.Services.Lobbies.Models.Player(id: uasId, data: CreateInitialPlayerData(localUser)),
-                    Filter = filters
                 };
 
                 return _currentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
@@ -416,27 +414,27 @@ namespace Dino.MultiplayerAsset
             return data;
         }
         
-        private List<QueryFilter> LobbyColorToFilter(LobbyColor limitColor)
-        {
-            List<QueryFilter> filters = new List<QueryFilter>();
-
-            switch (limitColor)
-            {
-                case LobbyColor.Orange:
-                    filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
-                    break;
-                case LobbyColor.Green:
-                    filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
-                    break;
-                case LobbyColor.Blue:
-                    filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
-                    break;
-                    
-            }
-
-            return filters;
-            
-        }
+        // private List<QueryFilter> LobbyColorToFilter(LobbyColor limitColor)
+        // {
+        //     List<QueryFilter> filters = new List<QueryFilter>();
+        //
+        //     switch (limitColor)
+        //     {
+        //         case LobbyColor.Orange:
+        //             filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
+        //             break;
+        //         case LobbyColor.Green:
+        //             filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
+        //             break;
+        //         case LobbyColor.Blue:
+        //             filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+        //             break;
+        //             
+        //     }
+        //
+        //     return filters;
+        //     
+        // }
 
         private void ParseCustomPlayerData(LocalPlayer player, string dataKey, string playerDataValue)
         {

@@ -24,12 +24,10 @@ public class MenuLobbyUI : MonoBehaviour
     
     [Header("Browse Lobby UI")]
     [SerializeField] private Button _GoBrowseLobbyButton;
-    [SerializeField] private GameObject _BrowseLobbyUI;
-    [SerializeField] private Button _RefreshLobbiesButton;
-    [SerializeField] private GameObject _LobbyList;
     
-    [Header("InLobbyUI")]
-    [SerializeField] private GameObject _InLobbyUI;
+    [Header("Game Events")]
+    [SerializeField] private GameEvent _onInitLobby;
+    
     
     private bool _isPublic = false;
     private int _maxPlayersCount;
@@ -57,7 +55,6 @@ public class MenuLobbyUI : MonoBehaviour
         
         UpdatePublic();
         
-        EnableUIGameObjects(false, _InLobbyUI);
         EnableUIGameObjects(false, _CreateLobbyUI);
         
         GameNetworkManager.Instance.OnGameStateChanged += OnGameStateChanged;
@@ -95,7 +92,8 @@ public class MenuLobbyUI : MonoBehaviour
     {
         EnableUIGameObjects(false, _initalButttons);
         EnableUIGameObjects(false, _CreateLobbyUI);
-        EnableUIGameObjects(true, _InLobbyUI);
+        
+        _onInitLobby.Raise();
         Debug.Log("Entered in lobby UI");
     }
     
