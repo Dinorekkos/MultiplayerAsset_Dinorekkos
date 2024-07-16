@@ -70,8 +70,8 @@ namespace Dino.MultiplayerAsset
             {
                 var id = player.Id;
                 remotePlayerIDs.Add(id);
-                
-                var isHost = localLobby.HostID.Equals(player.Id);
+
+                var isHost = remoteLobby.HostId.Equals(player.Id);
                 var displayName = player.Data?.ContainsKey(key_Displayname) == true
                     ? player.Data[key_Displayname].Value
                     : default;

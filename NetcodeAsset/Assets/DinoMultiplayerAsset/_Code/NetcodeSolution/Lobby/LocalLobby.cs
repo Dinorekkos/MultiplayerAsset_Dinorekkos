@@ -20,12 +20,13 @@ namespace Dino.MultiplayerAsset
         public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
         public CallbackValue<string> LobbyName = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> HostID = new CallbackValue<string>(string.Empty);
-        public CallbackValue<long> LastUpdate = new CallbackValue<long>();
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
         public CallbackValue<int> MaxPlayerCount = new CallbackValue<int>();
         public CallbackValue<long> LastUpdated = new CallbackValue<long>();
         public CallbackValue<bool> Private = new CallbackValue<bool>();
         public CallbackValue<int> AvailableSlots = new CallbackValue<int>();
+        public CallbackValue<bool> Locked = new CallbackValue<bool>();
+
         
         public int PlayerCount => _localPlayers.Count;
         public List<LocalPlayer> LocalPlayers => _localPlayers;
@@ -45,7 +46,7 @@ namespace Dino.MultiplayerAsset
             LobbyName.Value = "";
             LobbyID.Value = "";
             LobbyCode.Value = "";
-            MaxPlayerCount.Value = 4;
+            MaxPlayerCount.Value = GameNetworkManager.Instance.NetworkSettings.MaxPlayerCount;
             
             OnUserJoined = null;
             OnUserLeft = null;
@@ -58,7 +59,7 @@ namespace Dino.MultiplayerAsset
 
         public LocalLobby()
         {
-            LastUpdate.Value = DateTime.Now.ToFileTimeUtc();
+            LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
             HostID.onChanged += OnHostChanged;
         }
 
@@ -102,7 +103,7 @@ namespace Dino.MultiplayerAsset
             sb.Append("Code: ");
             sb.AppendLine(LobbyCode.Value);
             sb.Append("Lobby LocalLobbyState Last Edit: ");
-            sb.AppendLine(new DateTime(LastUpdate.Value).ToString());
+            sb.AppendLine(new DateTime(LastUpdated.Value).ToString());
             sb.Append("RelayCode: ");
             sb.AppendLine(RelayCode.Value);
             sb.Append("Max Player Count: ");
