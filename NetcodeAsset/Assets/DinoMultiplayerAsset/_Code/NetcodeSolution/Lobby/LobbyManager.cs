@@ -369,6 +369,10 @@ namespace Dino.MultiplayerAsset
             }
             
         }
+        public async Task<QueryResponse> GetQueryLobbies()
+        {
+            return await LobbyService.Instance.QueryLobbiesAsync();
+        }
         public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
         {
             if(!InLobby()) return;
@@ -402,6 +406,7 @@ namespace Dino.MultiplayerAsset
             
         }
 
+
     #endregion
 
         #region private methods
@@ -414,28 +419,7 @@ namespace Dino.MultiplayerAsset
             return data;
         }
         
-        // private List<QueryFilter> LobbyColorToFilter(LobbyColor limitColor)
-        // {
-        //     List<QueryFilter> filters = new List<QueryFilter>();
-        //
-        //     switch (limitColor)
-        //     {
-        //         case LobbyColor.Orange:
-        //             filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
-        //             break;
-        //         case LobbyColor.Green:
-        //             filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
-        //             break;
-        //         case LobbyColor.Blue:
-        //             filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
-        //             break;
-        //             
-        //     }
-        //
-        //     return filters;
-        //     
-        // }
-
+        
         private void ParseCustomPlayerData(LocalPlayer player, string dataKey, string playerDataValue)
         {
             if (dataKey == KEY_USERSTATUS)

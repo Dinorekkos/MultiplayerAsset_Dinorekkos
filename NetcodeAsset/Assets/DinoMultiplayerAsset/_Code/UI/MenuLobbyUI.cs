@@ -27,6 +27,7 @@ public class MenuLobbyUI : MonoBehaviour
     
     [Header("Game Events")]
     [SerializeField] private GameEvent _onInitLobby;
+    [SerializeField] private GameEvent _onBrowseLobbies;
     
     
     private bool _isPublic = false;
@@ -110,6 +111,7 @@ public class MenuLobbyUI : MonoBehaviour
 
     private void BrowseLobbies()
     {
+        _onBrowseLobbies.Raise();
     }
 
 

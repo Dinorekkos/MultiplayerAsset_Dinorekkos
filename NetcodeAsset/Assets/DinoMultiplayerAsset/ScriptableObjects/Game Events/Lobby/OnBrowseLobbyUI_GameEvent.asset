@@ -10,5 +10,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac151aa725b3b4a46a804ad8c129ec6d, type: 3}
-  m_Name: OnBrowseLobby_GameEvent
+  m_Name: OnBrowseLobbyUI_GameEvent
   m_EditorClassIdentifier: 

@@ -30,20 +30,19 @@ public class InLobbyUI : MonoBehaviour
     {
         _onInitLobby.OnEventRaised += InitLobby;
         _container.SetActive(false);
+        Initialize();
     }
 
     private void Initialize()
     {
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
-        _startGameButton.onClick.AddListener(StartGame);
+        _startGameButton.onClick.AddListener(GoToGameButton);
     }
 
     private void InitLobby()
     {
         _container.SetActive(true);
-        Initialize();
-        
     }
     private void UpdatePlayerCount(LocalPlayer localPlayer)
     {
@@ -91,14 +90,14 @@ public class InLobbyUI : MonoBehaviour
             PlayerLobbyUI playerLobbyUI = playerUI.GetComponent<PlayerLobbyUI>();
             playerLobbyUI.SetName(player.DisplayName.Value);
             playerLobbyUI.SetReady(false);
-            Debug.Log("PLayer Status ".SetColor("#20D0F7") + player.UserStatus.Value);
+            // Debug.Log("PLayer Status ".SetColor("#20D0F7") + player.UserStatus.Value);
         }
         
     }
     
-    private void StartGame()
+    private void GoToGameButton()
     {
-        // GameNetworkManager.Instance.StartGame();
+        GameNetworkManager.Instance.GoToGame();
     }
    
 }
