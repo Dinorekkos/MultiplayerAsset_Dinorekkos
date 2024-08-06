@@ -22,6 +22,8 @@ public class InLobbyUI : MonoBehaviour
     [SerializeField] private GameObject _playerContainer;
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private GameObject _container;
+    [SerializeField] private Button _quitLobbyButton;
+    [SerializeField] private GameEvent _onReturnMenu;
 
     LocalLobby _localLobby;
     private int _currentPlayers;
@@ -37,7 +39,9 @@ public class InLobbyUI : MonoBehaviour
     {
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
+        
         _startGameButton.onClick.AddListener(GoToGameButton);
+        _quitLobbyButton.onClick.AddListener(LeaveLobby);
     }
 
     private void InitLobby()
@@ -98,6 +102,14 @@ public class InLobbyUI : MonoBehaviour
     private void GoToGameButton()
     {
         GameNetworkManager.Instance.GoToGame();
+    }
+    
+    private void LeaveLobby()
+    {
+        GameNetworkManager.Instance.ReturnToMenu();
+        _container.SetActive(false);
+        _onReturnMenu.Raise();
+        
     }
    
 }

@@ -87,6 +87,7 @@ namespace Dino.MultiplayerAsset
             //Initialize the local player, local lobby, lobby manager, and relay manager.
             _localUser = new LocalPlayer("", 0,false, "LocalPlayer");
             _localLobby = new LocalLobby {LocalLobbyState = {Value = LobbyState.Lobby}};
+            _lobbyList = new LocalLobbyList();
             _lobbyManager = new LobbyManager();
             _relayManager = new RelayManager();
             
@@ -241,6 +242,12 @@ namespace Dino.MultiplayerAsset
 
         #region public Methods
 
+        public void ReturnToMenu()
+        {
+            SetGameState(GameState.Menu);
+            SetLocalUserStatus(PlayerStatus.Menu);
+
+        }
         public void StartNetworkedGame()
         {
 #pragma warning disable 4014

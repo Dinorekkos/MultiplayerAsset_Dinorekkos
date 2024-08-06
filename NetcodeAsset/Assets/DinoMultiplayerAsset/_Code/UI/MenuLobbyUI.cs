@@ -21,6 +21,7 @@ public class MenuLobbyUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _MaxPlayerText;
     [SerializeField] private Toggle _publicToggle;
     [SerializeField] private TextMeshProUGUI _PublicText;
+    [SerializeField] private Button _OnReturnButton;
     
     [Header("Browse Lobby UI")]
     [SerializeField] private Button _GoBrowseLobbyButton;
@@ -28,6 +29,7 @@ public class MenuLobbyUI : MonoBehaviour
     [Header("Game Events")]
     [SerializeField] private GameEvent _onInitLobby;
     [SerializeField] private GameEvent _onBrowseLobbies;
+    [SerializeField] private GameEvent _onReturnMenu;
     
     
     private bool _isPublic = false;
@@ -37,6 +39,10 @@ public class MenuLobbyUI : MonoBehaviour
     {
         _GoCreateLobbyButton.onClick.AddListener(GoToCreateLobby);
         _GoBrowseLobbyButton.onClick.AddListener(BrowseLobbies);
+        _OnReturnButton.onClick.AddListener(ReturnToInitial);
+        _onReturnMenu.OnEventRaised += ReturnToInitial;
+        
+        
         _MaxPlayerSlider.onValueChanged.AddListener(delegate
         {
             UpdateMaxPlayersCount();
@@ -112,6 +118,7 @@ public class MenuLobbyUI : MonoBehaviour
     private void BrowseLobbies()
     {
         _onBrowseLobbies.Raise();
+        EnableUIGameObjects(false, _initalButttons);
     }
 
 
