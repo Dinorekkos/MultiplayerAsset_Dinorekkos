@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/DinoMultiplayerAsset/Scene/Lobby/LobbyScene.unity
     guid: 550e2849b134aa640b4ea89632fa88e0
+  - enabled: 1
+    path: Assets/DinoMultiplayerAsset/Scene/Gameplay/GameScene.unity
+    guid: 8f10a2f9fa8f94a4e8e1d15400fbe64e
   m_configObjects: {}

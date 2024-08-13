@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -49,6 +50,7 @@ namespace Dino.MultiplayerAsset
         private LobbyManager _lobbyManager;
         private RelayManager _relayManager;
         private LocalLobbyList _lobbyList;
+        private NetworkManager _networkManager;
         #endregion
 
         #region public properties
@@ -57,6 +59,15 @@ namespace Dino.MultiplayerAsset
         public GameState LocalGameState { get; private set; }
         public NetworkSettingsSO NetworkSettings => _networkSettings;
         public LocalLobby LocalLobby => _localLobby;
+        public LocalLobbyList LobbyList => _lobbyList;
+        public NetworkManager NetworkManager => _networkManager;
+        public NetworkPrefabsList NetworkPrefabsList => _networkPrefabsList;
+        public LocalLobbyList LocalLobbyList => _lobbyList;
+        
+        public event Action<ulong> OnClientConnected;
+        public event Action<ulong> OnClientDisconnected;
+        
+        public event Action OnLobbyListChanged; 
         #endregion
 
         
@@ -66,18 +77,7 @@ namespace Dino.MultiplayerAsset
         {
             Initialize();
         }
-        // private void Update()
-        // {
-        //     if(Input.GetKeyDown(KeyCode.C))
-        //     {
-        //         CreateLobby("TestLobby", false);
-        //     }
-        //     
-        //     if(Input.GetKeyDown(KeyCode.J))
-        //     {
-        //         QuickJoin();
-        //     }
-        // }
+      
 
         #endregion
 
@@ -90,6 +90,7 @@ namespace Dino.MultiplayerAsset
             //Initialize the local player, local lobby, lobby manager, and relay manager.
             _localUser = new LocalPlayer("", 0,false, "LocalPlayer");
             _localLobby = new LocalLobby {LocalLobbyState = {Value = LobbyState.Lobby}};
+            _lobbyList = new LocalLobbyList();
             _lobbyManager = new LobbyManager();
             _relayManager = new RelayManager();
             
@@ -191,14 +192,14 @@ namespace Dino.MultiplayerAsset
 
         private void SetGameState(GameState state)
         {
-            var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu)
-                && LocalGameState == GameState.Lobby;
+            var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) && LocalGameState == GameState.Lobby;
             LocalGameState = state;
             OnGameStateChanged?.Invoke(state);
             Debug.Log("State Game Changed: ".SetColor("#93FFE8") + state);
 
             if (isLeavingLobby)
             {
+                Debug.Log("Leaving Lobby");
                 LeaveLobby();
             }
         }
@@ -211,24 +212,45 @@ namespace Dino.MultiplayerAsset
 
         async Task CreateNetworkManager()
         {
+            _networkManager = NetworkManager.Singleton;
+            InitializeNetworkEvents();
+            
             if (_localUser.IsHost.Value)
             {
                 await _relayManager.SetRelayHostData(_localLobby);
-                NetworkManager.Singleton.StartHost();
+                _networkManager.StartHost();
 
             }
             else
             {
                 await _relayManager.AwaitRelayCode(_localLobby);
                 await _relayManager.SetRelayClientData(_localLobby);
-                NetworkManager.Singleton.StartClient();
+                _networkManager.StartClient();
             }
+        }
+
+        private void InitializeNetworkEvents()
+        {
+            _networkManager.OnClientConnectedCallback += (clientID) =>
+            {
+                OnClientConnected?.Invoke(clientID);
+            };
+            _networkManager.OnClientDisconnectCallback += (clientID) =>
+            {
+                OnClientDisconnected?.Invoke(clientID);
+            };
         }
         #endregion
 
 
         #region public Methods
 
+        public void SetMenuState()
+        {
+            SetGameState(GameState.Menu);
+            SetLocalUserStatus(PlayerStatus.Menu);
+
+        }
         public void StartNetworkedGame()
         {
 #pragma warning disable 4014
@@ -301,10 +323,28 @@ namespace Dino.MultiplayerAsset
             else
             {
                 Debug.Log("No lobby found");
-                SetGameState(GameState.JoinMenu);
+                SetGameState(GameState.Menu);
             }
         }
         
+        public async void BrowseLobbies()
+        {
+            SetGameState(GameState.JoinMenu);
+            QueryResponse queryResponse = await _lobbyManager.GetQueryLobbies();
+            var lobbies = queryResponse.Results;
+            _lobbyList.Clear();
+            foreach (var lobby in lobbies)
+            {
+                var localLobby = new LocalLobby();
+                LobbyConverters.RemoteToLocal(lobby, localLobby);
+                _lobbyList.CurrentLobbies.Add(lobby.Id, localLobby);
+                Debug.Log("Lobby: " + localLobby.LobbyName.Value);
+            }
+            
+            OnLobbyListChanged?.Invoke();
+            
+            
+        }
         public void LoadScene(string sceneName)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
@@ -313,6 +353,17 @@ namespace Dino.MultiplayerAsset
       
 
         #endregion
+
+        public void GoToGame()
+        {   
+            Debug.Log("Go to Game");
+            StartNetworkedGame();
+            LoadScene("GameScene");
+            
+            
+        }
+        
+        
     }
 }
 public enum GameState

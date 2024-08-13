@@ -22,6 +22,8 @@ public class InLobbyUI : MonoBehaviour
     [SerializeField] private GameObject _playerContainer;
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private GameObject _container;
+    [SerializeField] private Button _quitLobbyButton;
+    [SerializeField] private GameEvent _onReturnMenu;
 
     LocalLobby _localLobby;
     private int _currentPlayers;
@@ -30,20 +32,21 @@ public class InLobbyUI : MonoBehaviour
     {
         _onInitLobby.OnEventRaised += InitLobby;
         _container.SetActive(false);
+        Initialize();
     }
 
     private void Initialize()
     {
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
-        _startGameButton.onClick.AddListener(StartGame);
+        
+        _startGameButton.onClick.AddListener(GoToGameButton);
+        _quitLobbyButton.onClick.AddListener(LeaveLobby);
     }
 
     private void InitLobby()
     {
         _container.SetActive(true);
-        Initialize();
-        
     }
     private void UpdatePlayerCount(LocalPlayer localPlayer)
     {
@@ -91,14 +94,22 @@ public class InLobbyUI : MonoBehaviour
             PlayerLobbyUI playerLobbyUI = playerUI.GetComponent<PlayerLobbyUI>();
             playerLobbyUI.SetName(player.DisplayName.Value);
             playerLobbyUI.SetReady(false);
-            Debug.Log("PLayer Status ".SetColor("#20D0F7") + player.UserStatus.Value);
+            // Debug.Log("PLayer Status ".SetColor("#20D0F7") + player.UserStatus.Value);
         }
         
     }
     
-    private void StartGame()
+    private void GoToGameButton()
     {
-        // GameNetworkManager.Instance.StartGame();
+        GameNetworkManager.Instance.GoToGame();
+    }
+    
+    private void LeaveLobby()
+    {
+        GameNetworkManager.Instance.SetMenuState();
+        _container.SetActive(false);
+        _onReturnMenu.Raise();
+        
     }
    
 }

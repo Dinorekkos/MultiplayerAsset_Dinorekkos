@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LobbyInQuery : MonoBehaviour
+public class LobbyInQueryUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _lobbyNameTxt;
     [SerializeField] private TextMeshProUGUI _numPlayersTxt;
