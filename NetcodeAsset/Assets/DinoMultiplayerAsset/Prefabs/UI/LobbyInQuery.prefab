@@ -57,6 +57,7 @@ MonoBehaviour:
   _numPlayersTxt: {fileID: 8274935774711366686}
   _isPublicTxt: {fileID: 6068785642766844471}
   _joinLobbyButton: {fileID: 2117176115948804979}
+  _onInitLobby: {fileID: 11400000, guid: 609b796d0d3ce354c808853609ce450e, type: 2}
 --- !u!1 &2001650930737861784
 GameObject:
   m_ObjectHideFlags: 0

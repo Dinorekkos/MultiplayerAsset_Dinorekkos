@@ -5778,6 +5778,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _onBrowseLobbies: {fileID: 11400000, guid: 5a7700da09e2f774e8d39d393e1ee36d, type: 2}
   _onReturnMenu: {fileID: 11400000, guid: 8f3c549319a7ecd408ea26d2bdea12b0, type: 2}
+  _onInitLobby: {fileID: 11400000, guid: 609b796d0d3ce354c808853609ce450e, type: 2}
   _parent: {fileID: 1641114468}
   _lobbiesContainer: {fileID: 2101131670}
   _lobbyPrefab: {fileID: 1141289218976774224, guid: ecb6f0d89eeefd04e929d2f8814c42c1, type: 3}
