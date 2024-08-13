@@ -106,7 +106,7 @@ public class InLobbyUI : MonoBehaviour
     
     private void LeaveLobby()
     {
-        GameNetworkManager.Instance.ReturnToMenu();
+        GameNetworkManager.Instance.SetMenuState();
         _container.SetActive(false);
         _onReturnMenu.Raise();
         

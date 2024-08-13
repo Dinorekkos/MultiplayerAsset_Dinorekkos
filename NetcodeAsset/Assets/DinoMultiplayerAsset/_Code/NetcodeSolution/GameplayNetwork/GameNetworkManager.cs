@@ -62,9 +62,12 @@ namespace Dino.MultiplayerAsset
         public LocalLobbyList LobbyList => _lobbyList;
         public NetworkManager NetworkManager => _networkManager;
         public NetworkPrefabsList NetworkPrefabsList => _networkPrefabsList;
+        public LocalLobbyList LocalLobbyList => _lobbyList;
         
         public event Action<ulong> OnClientConnected;
         public event Action<ulong> OnClientDisconnected;
+        
+        public event Action OnLobbyListChanged; 
         #endregion
 
         
@@ -189,14 +192,14 @@ namespace Dino.MultiplayerAsset
 
         private void SetGameState(GameState state)
         {
-            var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu)
-                && LocalGameState == GameState.Lobby;
+            var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) && LocalGameState == GameState.Lobby;
             LocalGameState = state;
             OnGameStateChanged?.Invoke(state);
             Debug.Log("State Game Changed: ".SetColor("#93FFE8") + state);
 
             if (isLeavingLobby)
             {
+                Debug.Log("Leaving Lobby");
                 LeaveLobby();
             }
         }
@@ -242,7 +245,7 @@ namespace Dino.MultiplayerAsset
 
         #region public Methods
 
-        public void ReturnToMenu()
+        public void SetMenuState()
         {
             SetGameState(GameState.Menu);
             SetLocalUserStatus(PlayerStatus.Menu);
@@ -320,27 +323,28 @@ namespace Dino.MultiplayerAsset
             else
             {
                 Debug.Log("No lobby found");
-                SetGameState(GameState.JoinMenu);
+                SetGameState(GameState.Menu);
             }
         }
-
-        public async void BindLobbiesInQuery()
+        
+        public async void BrowseLobbies()
         {
+            SetGameState(GameState.JoinMenu);
             QueryResponse queryResponse = await _lobbyManager.GetQueryLobbies();
-         
             var lobbies = queryResponse.Results;
-            
             _lobbyList.Clear();
-            
             foreach (var lobby in lobbies)
             {
                 var localLobby = new LocalLobby();
                 LobbyConverters.RemoteToLocal(lobby, localLobby);
                 _lobbyList.CurrentLobbies.Add(lobby.Id, localLobby);
+                Debug.Log("Lobby: " + localLobby.LobbyName.Value);
             }
             
+            OnLobbyListChanged?.Invoke();
+            
+            
         }
-        
         public void LoadScene(string sceneName)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);

@@ -65,6 +65,9 @@ public class MenuLobbyUI : MonoBehaviour
         EnableUIGameObjects(false, _CreateLobbyUI);
         
         GameNetworkManager.Instance.OnGameStateChanged += OnGameStateChanged;
+        
+        GameNetworkManager.Instance.SetMenuState();
+        
 
         
     }
