@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2997723527574119346}
   - component: {fileID: 5541213145624776269}
-  - component: {fileID: 2899806390325192522}
   m_Layer: 0
   m_Name: DinoMultiplayer
   m_TagString: Untagged
@@ -46,16 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _networkSettings: {fileID: 11400000, guid: 266dc5de36526c241b950c248e7f4b24, type: 2}
-  _networkPrefabsList: {fileID: 11400000, guid: 89c9286ee92f43f44a5e443ead57e3dc, type: 2}
---- !u!114 &2899806390325192522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3869227782530802469}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e586aa9adb952f1489071535dc00c914, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  _networkPrefabsList: {fileID: 11400000, guid: 39be97c1beedee44bae8991e8e44874d, type: 2}

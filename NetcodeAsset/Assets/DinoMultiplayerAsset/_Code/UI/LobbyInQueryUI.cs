@@ -8,16 +8,21 @@ using UnityEngine.UI;
 
 public class LobbyInQueryUI : MonoBehaviour
 {
+    [Header("UI")]
     [SerializeField] private TextMeshProUGUI _lobbyNameTxt;
     [SerializeField] private TextMeshProUGUI _numPlayersTxt;
     [SerializeField] private TextMeshProUGUI _isPublicTxt;
     [SerializeField] private Button _joinLobbyButton;
     
+    [Header("Events")]
+    [SerializeField] private GameEvent _onInitLobby;
+
+    
     LocalLobby _localLobby;
     
     private void Start()
     {
-        
+        _joinLobbyButton.onClick.AddListener(JoinLobbyButton);
     }
 
     public void InitLobby(LocalLobby localLobby)
@@ -28,8 +33,10 @@ public class LobbyInQueryUI : MonoBehaviour
         _isPublicTxt.text = _localLobby.Private.Value ? "Private" : "Public";
     }
 
-    public void OnJoinLobby()
+    public void JoinLobbyButton()
     {
+        GameNetworkManager.Instance.JoinLobby(_localLobby.LobbyID.Value, _localLobby.LobbyCode.Value);
+        _onInitLobby.Raise();
         
     }
 }

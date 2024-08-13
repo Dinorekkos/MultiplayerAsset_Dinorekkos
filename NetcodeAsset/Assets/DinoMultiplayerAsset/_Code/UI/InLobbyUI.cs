@@ -39,6 +39,7 @@ public class InLobbyUI : MonoBehaviour
     {
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayerCount;
+        GameNetworkManager.Instance.LocalLobby.OnUserLeft += OnUserLeft;
         
         _startGameButton.onClick.AddListener(GoToGameButton);
         _quitLobbyButton.onClick.AddListener(LeaveLobby);
@@ -58,6 +59,18 @@ public class InLobbyUI : MonoBehaviour
         bool isPrivate = _localLobby.Private.Value;
         UpdateLobbyCode(isPrivate);
         UpdatePlayers();
+    }
+    
+    private void OnUserLeft(int index)
+    {
+        LocalPlayer player = _localLobby.GetLocalPlayer(index);
+        
+        if (player != null)
+        {
+            Debug.Log("Player Left: ".SetColor("#F77820") + player.DisplayName.Value);
+            UpdatePlayerCount(player);
+        }
+        
     }
 
     private void UpdateLobbyName(string lobbyName)
@@ -81,7 +94,7 @@ public class InLobbyUI : MonoBehaviour
     }
 
 
-    private void UpdatePlayers()
+    private void UpdatePlayers(int index = 0)
     {
         foreach (Transform child in _playerContainer.transform)
         {

@@ -11,6 +11,7 @@ public class BrowseLobbyUI : MonoBehaviour
     [Header("Events")]
     [SerializeField] private GameEvent _onBrowseLobbies;
     [SerializeField] private GameEvent _onReturnMenu;
+    [SerializeField] private GameEvent _onInitLobby;
 
     
     [Header("UI")]
@@ -26,11 +27,14 @@ public class BrowseLobbyUI : MonoBehaviour
     {
         _parent.SetActive(false);
         _returnButton.onClick.AddListener(ReturnToInitial);
-        _onBrowseLobbies.OnEventRaised += BrowseLobbies;    
+        _onBrowseLobbies.OnEventRaised += BrowseLobbies;
+        _onInitLobby.OnEventRaised += CloseUI;
         GameNetworkManager.Instance.OnLobbyListChanged += UpdateLobbies;
     }
 
     
+
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
@@ -39,6 +43,11 @@ public class BrowseLobbyUI : MonoBehaviour
         }
     }
     
+    private void CloseUI()
+    {
+        _parent.SetActive(false);
+        
+    }
     private void BrowseLobbies()
     {
         GameNetworkManager.Instance.BrowseLobbies();
