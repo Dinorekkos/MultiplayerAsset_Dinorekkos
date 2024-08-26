@@ -235,11 +235,11 @@ namespace Dino.MultiplayerAsset
                 {
                     localLobby.RemovePlayer(leftPlayerIndex);
                 }
-
             };
 
             _lobbyEventCallbacks.PlayerJoined += players =>
             {
+                Debug.Log("Player Joined");
                 foreach (var playerChanges in players)
                 {
                     Unity.Services.Lobbies.Models.Player joinedPlayer = playerChanges.Player;
@@ -313,7 +313,8 @@ namespace Dino.MultiplayerAsset
             
             _lobbyEventCallbacks.KickedFromLobby += () =>
             {
-                Debug.Log("Left Lobby");
+                Debug.Log("Kicked from Lobby");
+                localLobby.OnKickedFromLobby();
                 Dispose();
             };
 

@@ -63,6 +63,7 @@ namespace Dino.MultiplayerAsset
         public NetworkManager NetworkManager => _networkManager;
         public NetworkPrefabsList NetworkPrefabsList => _networkPrefabsList;
         public LocalLobbyList LocalLobbyList => _lobbyList;
+        public LocalPlayer LocalPlayer => _localUser;
         
         public event Action<ulong> OnClientConnected;
         public event Action<ulong> OnClientDisconnected;
