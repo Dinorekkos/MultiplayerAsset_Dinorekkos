@@ -13,6 +13,7 @@ namespace Dino.MultiplayerAsset
         public Action<LocalPlayer> OnUserJoined;
         public Action<int> OnUserLeft;
         public Action<int> OnUserReadyChanged;
+        public Action OnPlayerKicked;
         
         public CallbackValue<string> LobbyID = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> LobbyCode = new CallbackValue<string>(string.Empty);
@@ -53,6 +54,10 @@ namespace Dino.MultiplayerAsset
             
         }
 
+        public void OnKickedFromLobby()
+        {
+            OnPlayerKicked?.Invoke();
+        }
         #endregion
 
         #region public constructors
@@ -89,6 +94,7 @@ namespace Dino.MultiplayerAsset
 
         public void RemovePlayer(int playerIndex)
         {
+            Debug.Log($"Removing User: {_localPlayers[playerIndex].DisplayName.Value} - {_localPlayers[playerIndex].ID.Value} from slot {playerIndex + 1}/{PlayerCount}");
             _localPlayers[playerIndex].UserStatus.onChanged -= OnUserChangedStatus;
             _localPlayers.RemoveAt(playerIndex);
             OnUserLeft?.Invoke(playerIndex);
