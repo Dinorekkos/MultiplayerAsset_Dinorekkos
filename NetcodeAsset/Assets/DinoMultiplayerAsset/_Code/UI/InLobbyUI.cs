@@ -40,34 +40,46 @@ public class InLobbyUI : MonoBehaviour
     private void Initialize()
     {
         _onInitLobby.OnEventRaised += InitLobby;
-        
-        GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
-        GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayers;
-        GameNetworkManager.Instance.LocalLobby.OnUserLeft += OnUserLeft;
-        GameNetworkManager.Instance.LocalLobby.OnUserReadyChanged += OnPlayersReadyChanged;
-        
-        
+        SubscribeLobbyEvents();
         _localPlayer = GameNetworkManager.Instance.LocalPlayer;
         _startGameButton.onClick.AddListener(GoToGameButton);
         _readyButton.onClick.AddListener(HandleReady);
         _quitLobbyButton.onClick.AddListener(LeaveLobby);
-        
-        
     }
+
+    private void SubscribeLobbyEvents()
+    {
+        GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
+        GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayers;
+        GameNetworkManager.Instance.LocalLobby.OnUserLeft += OnUserLeft;
+        GameNetworkManager.Instance.LocalLobby.OnUserReadyChanged += OnPlayersReadyChanged;
+        GameNetworkManager.Instance.LocalLobby.HostID.onChanged += CheckHost;
+    }
+    
+    private void UnsubscribedEvents()
+    {
+        GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged -= UpdateLobbyName;
+        GameNetworkManager.Instance.LocalLobby.OnUserJoined -= UpdatePlayers;
+        GameNetworkManager.Instance.LocalLobby.OnUserLeft -= OnUserLeft;
+        GameNetworkManager.Instance.LocalLobby.OnUserReadyChanged -= OnPlayersReadyChanged;
+        GameNetworkManager.Instance.LocalLobby.HostID.onChanged -= CheckHost;
+    }
+    
+
 
     private void InitLobby()
     {
+        SubscribeLobbyEvents();
+        UpdateLobby();
         _container.SetActive(true);
+    }
+
+    private void UpdateLobby()
+    {
+        if(_localLobby == null) return;
         
-        if (_localPlayer.IsHost.Value)
-        {
-            _startGameButton.gameObject.SetActive(true);
-        }
-        else
-        {
-            _startGameButton.gameObject.SetActive(false);
-        }
-        
+        CheckHost(_localLobby.HostID.Value);
+        UpdatePlayers();
     }
     private void UpdatePlayers(LocalPlayer localPlayer = null)
     {
@@ -88,6 +100,17 @@ public class InLobbyUI : MonoBehaviour
     private void OnUserLeft(int index)
     {
         UpdatePlayers();
+        CheckHost();
+    }
+
+    private void CheckHost(string hostID = "")
+    {
+        if(hostID == _localPlayer.ID.Value)
+        {
+            _startGameButton.gameObject.SetActive(true);
+        }
+        else
+            _startGameButton.gameObject.SetActive(false);
     }
 
     private void UpdateLobbyName(string lobbyName)
@@ -148,8 +171,11 @@ public class InLobbyUI : MonoBehaviour
         DestroyBanners();
         GameNetworkManager.Instance.SetMenuState();
         _container.SetActive(false);
+        UnsubscribedEvents();
         _onReturnMenu.Raise();
         
     }
+    
+   
    
 }

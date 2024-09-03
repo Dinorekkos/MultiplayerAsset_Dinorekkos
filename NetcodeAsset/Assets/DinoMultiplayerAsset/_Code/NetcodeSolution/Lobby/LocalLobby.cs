@@ -14,6 +14,7 @@ namespace Dino.MultiplayerAsset
         public Action<int> OnUserLeft;
         public Action<int> OnUserReadyChanged;
         public Action OnPlayerKicked;
+        // public Action<string> OnHostIDChanged;
         
         public CallbackValue<string> LobbyID = new CallbackValue<string>(string.Empty);
         public CallbackValue<string> LobbyCode = new CallbackValue<string>(string.Empty);
@@ -127,6 +128,7 @@ namespace Dino.MultiplayerAsset
             foreach (var player in _localPlayers)
             {
                 player.IsHost.Value = player.ID.Value == newHostID;
+                // OnHostIDChanged?.Invoke(newHostID);
             }
         }
         
