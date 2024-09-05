@@ -11,9 +11,7 @@ public class LocalPlayer
     public CallbackValue<PlayerStatus> UserStatus = new CallbackValue<PlayerStatus>(PlayerStatus.None);
     public CallbackValue<string> DisplayName = new CallbackValue<string>(string.Empty);
     public CallbackValue<int> Index = new CallbackValue<int>(0);
-
-
-
+    
     public DateTime LastUpdate;
     
     public LocalPlayer(string id,int index, bool isHost, string displayName = default, PlayerStatus status = default(PlayerStatus))

@@ -100,6 +100,14 @@ namespace Dino.MultiplayerAsset
             _localPlayers.RemoveAt(playerIndex);
             OnUserLeft?.Invoke(playerIndex);
         }
+        
+        public void ChangePlayerStatus(int playerIndex, PlayerStatus status)
+        {
+            _localPlayers[playerIndex].UserStatus.Value = status;
+            _localPlayers[playerIndex].UserStatus.onChanged?.Invoke(status);
+            
+            Debug.Log($"User: {_localPlayers[playerIndex].DisplayName.Value} - {_localPlayers[playerIndex].ID.Value} changed status to {status}".SetColor("#F77820"));
+        }
 
         public override string ToString()
         {

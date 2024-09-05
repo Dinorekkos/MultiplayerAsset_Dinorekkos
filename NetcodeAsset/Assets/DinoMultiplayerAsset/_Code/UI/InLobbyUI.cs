@@ -72,6 +72,7 @@ public class InLobbyUI : MonoBehaviour
         SubscribeLobbyEvents();
         UpdateLobby();
         _container.SetActive(true);
+        _readyButton.interactable = true;
     }
 
     private void UpdateLobby()
@@ -142,8 +143,7 @@ public class InLobbyUI : MonoBehaviour
         {
             GameObject playerUI = Instantiate(_playerPrefab, _playerContainer.transform);
             PlayerLobbyUI playerLobbyUI = playerUI.GetComponent<PlayerLobbyUI>();
-            playerLobbyUI.SetName(player.DisplayName.Value);
-            playerLobbyUI.SetReady(player.UserStatus.Value == PlayerStatus.Ready);
+            playerLobbyUI.InitPlayer(player);
             // Debug.Log("PLayer Status ".SetColor("#20D0F7") + player.UserStatus.Value);
         }
     }
@@ -163,7 +163,9 @@ public class InLobbyUI : MonoBehaviour
     }
     private void HandleReady()
     {
-        _localPlayer.UserStatus.Value = PlayerStatus.Ready;
+        Debug.Log("Ready Button Clicked + " + _localPlayer.Index.Value);
+        _localLobby.ChangePlayerStatus(_localPlayer.Index.Value, PlayerStatus.Ready);
+        _readyButton.interactable = false;
     }
     
     private void LeaveLobby()

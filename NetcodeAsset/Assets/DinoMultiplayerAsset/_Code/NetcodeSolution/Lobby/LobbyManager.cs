@@ -256,10 +256,72 @@ namespace Dino.MultiplayerAsset
                     }
 
                     localLobby.AddPlayer(index, newPlayer);
-                    Debug.Log($"Player {newPlayer.DisplayName.Value} joined at index {index}");
+                    Debug.Log($"Player {newPlayer.DisplayName.Value} joined at index {index}".SetColor(""));
                 }
                 
                 Debug.Log("Player Joined");
+            };
+
+            _lobbyEventCallbacks.PlayerDataChanged += changes =>
+            {
+                foreach (var lobbyPlayerChanges in changes)
+                {
+                    var playerIndex = lobbyPlayerChanges.Key;
+                    var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                    if (localPlayer == null) continue;
+                    var playerChanges = lobbyPlayerChanges.Value;
+
+                    foreach (var varPlayerChange in playerChanges)
+                    {
+                        var changedValue = varPlayerChange.Value;
+                        var playerDataObject = changedValue.Value;
+                        ParseCustomPlayerData(localPlayer,varPlayerChange.Key, playerDataObject.Value);
+                    }
+                }
+            };
+            
+            _lobbyEventCallbacks.PlayerDataAdded += changes =>
+            {
+                foreach (var lobbyPlayerChanges in changes)
+                {
+                    var playerIndex = lobbyPlayerChanges.Key;
+                    var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                    if (localPlayer == null)
+                        continue;
+                    var playerChanges = lobbyPlayerChanges.Value;
+
+                    //There are changes on the Player
+                    foreach (var playerChange in playerChanges)
+                    {
+                        var changedValue = playerChange.Value;
+
+                        //There are changes on some of the changes in the player list of changes
+                        var playerDataObject = changedValue.Value;
+                        ParseCustomPlayerData(localPlayer, playerChange.Key, playerDataObject.Value);
+                    }
+                }
+            };
+            
+            _lobbyEventCallbacks.PlayerDataRemoved += changes =>
+            {
+                foreach (var lobbyPlayerChanges in changes)
+                {
+                    var playerIndex = lobbyPlayerChanges.Key;
+                    var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                    if (localPlayer == null)
+                        continue;
+                    var playerChanges = lobbyPlayerChanges.Value;
+
+                    //There are changes on the Player
+                    if (playerChanges == null)
+                        continue;
+
+                    foreach (var playerChange in playerChanges.Values)
+                    {
+                        //There are changes on some of the changes in the player list of changes
+                        Debug.LogWarning("This Sample does not remove Player Values currently.");
+                    }
+                }
             };
 
             _lobbyEventCallbacks.LobbyChanged += async changes =>
