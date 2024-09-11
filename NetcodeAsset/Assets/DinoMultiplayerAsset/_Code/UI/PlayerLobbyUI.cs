@@ -10,6 +10,7 @@ public class PlayerLobbyUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _NameTxt;
     [SerializeField] private TextMeshProUGUI _isReadyTxt;
     private LocalPlayer _localPlayer;
+    [SerializeField] PlayerStatus _playerStatus;
     
     public void InitPlayer(LocalPlayer localPlayer)
     {
@@ -17,17 +18,12 @@ public class PlayerLobbyUI : MonoBehaviour
         SetName(localPlayer.DisplayName.Value);
         SetReady(localPlayer.UserStatus.Value == PlayerStatus.Ready);
         
-        _localPlayer.UserStatus.onChanged += OnReadyChanged;
+        localPlayer.UserStatus.onChanged += OnUserStatusChanged;
+        
     }
 
-    private void OnDestroy()
+    private void OnUserStatusChanged(PlayerStatus status)
     {
-        _localPlayer.UserStatus.onChanged -= OnReadyChanged;
-    }
-
-    private void OnReadyChanged(PlayerStatus status)
-    {
-        Debug.Log("Player Ready Changed");
         SetReady(status == PlayerStatus.Ready);
     }
 
@@ -38,7 +34,16 @@ public class PlayerLobbyUI : MonoBehaviour
     
     private void SetReady(bool isReady)
     {
-        _isReadyTxt.text = isReady ? "Ready" : "Not Ready";
+        if (!_localPlayer.IsHost.Value)
+        {
+            _isReadyTxt.text = isReady ? "Ready" : "Not Ready";
+        }
+        else
+        {
+            _isReadyTxt.text = "Ready";
+        }
+        _playerStatus = _localPlayer.UserStatus.Value;
+        
     }
     
 

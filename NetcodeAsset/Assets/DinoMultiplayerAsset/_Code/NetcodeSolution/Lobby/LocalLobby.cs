@@ -48,8 +48,9 @@ namespace Dino.MultiplayerAsset
             LobbyName.Value = "";
             LobbyID.Value = "";
             LobbyCode.Value = "";
+            Private.Value = false;
+            AvailableSlots.Value = GameNetworkManager.Instance.NetworkSettings.MaxPlayerCount;
             MaxPlayerCount.Value = GameNetworkManager.Instance.NetworkSettings.MaxPlayerCount;
-            
             OnUserJoined = null;
             OnUserLeft = null;
             
@@ -79,6 +80,18 @@ namespace Dino.MultiplayerAsset
         
         #region public methods
 
+        public int GetPlayerIndex(string playerID)
+        {
+            for (int i = 0; i < _localPlayers.Count; i++)
+            {
+                if (_localPlayers[i].ID.Value == playerID)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
         public LocalPlayer GetLocalPlayer(int index)
         {
             return PlayerCount > index ? _localPlayers[index] : null;
@@ -149,6 +162,7 @@ namespace Dino.MultiplayerAsset
                 if (player.UserStatus.Value == PlayerStatus.Ready)
                 {
                     readyCount++;
+                    Debug.Log($"User: {player.DisplayName.Value} - {player.ID.Value} is ready".SetColor("#F77820"));
                 }
             }
             OnUserReadyChanged?.Invoke(readyCount);

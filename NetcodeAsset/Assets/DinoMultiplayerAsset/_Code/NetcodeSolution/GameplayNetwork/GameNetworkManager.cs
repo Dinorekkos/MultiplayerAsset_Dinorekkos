@@ -135,7 +135,7 @@ namespace Dino.MultiplayerAsset
         private async Task CreateLobby()
         {
             _localUser.IsHost.Value = true;
-            _localLobby.OnUserReadyChanged += OnPlayersReady;
+            _localLobby.OnUserReadyChanged = OnPlayersReady;
             try
             {
                 await BindLobby();
@@ -147,18 +147,19 @@ namespace Dino.MultiplayerAsset
             }
         }
 
+        //Only Host needs to listen to this and change state.
         private void OnPlayersReady(int readyCount)
         {
             if (readyCount == _localLobby.PlayerCount && _localLobby.LocalLobbyState.Value != LobbyState.CountDown)
             {
                 _localLobby.LocalLobbyState.Value = LobbyState.CountDown;
-                SendLocalLobbyData();
             }
             else if (_localLobby.LocalLobbyState.Value == LobbyState.CountDown)
             {
                 _localLobby.LocalLobbyState.Value = LobbyState.Lobby;
-                SendLocalLobbyData();
             }
+            
+            SendLocalLobbyData();
         }
 
         private async Task BindLobby()
@@ -240,6 +241,16 @@ namespace Dino.MultiplayerAsset
             {
                 OnClientDisconnected?.Invoke(clientID);
             };
+        }
+        
+        void SetCurrentLobbies(IEnumerable<LocalLobby> lobbies)
+        {
+            var newLobbyDict = new Dictionary<string, LocalLobby>();
+            foreach (var lobby in lobbies)
+                newLobbyDict.Add(lobby.LobbyID.Value, lobby);
+
+            LobbyList.CurrentLobbies = newLobbyDict;
+            LobbyList.QueryState.Value = LobbyQueryState.Fetched;
         }
         #endregion
 
@@ -343,9 +354,24 @@ namespace Dino.MultiplayerAsset
             }
             
             OnLobbyListChanged?.Invoke();
+        }
+
+        public async void QueryLobbies()
+        {
+            LobbyList.QueryState.Value = LobbyQueryState.Fetching;
+            var queryResponse = await _lobbyManager.RetrieveLobbyListAsync();
             
+            if (queryResponse == null)
+            {
+                LobbyList.QueryState.Value = LobbyQueryState.Error;
+                return;
+            }
+            
+            SetCurrentLobbies(LobbyConverters.QueryToLocalList(queryResponse));
+            OnLobbyListChanged?.Invoke();
             
         }
+        
         public void LoadScene(string sceneName)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);

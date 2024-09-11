@@ -89,6 +89,7 @@ namespace Dino.MultiplayerAsset
                 else
                 {
                     localPlayer.ID.Value = id;
+                    localPlayer.Index.Value = index;
                     localPlayer.IsHost.Value = isHost;
                     localPlayer.DisplayName.Value = displayName;
                     localPlayer.UserStatus.Value = status;
@@ -98,6 +99,22 @@ namespace Dino.MultiplayerAsset
             }
 
 
+        }
+        
+        
+        public static List<LocalLobby> QueryToLocalList(QueryResponse response)
+        {
+            List<LocalLobby> retLst = new List<LocalLobby>();
+            foreach (var lobby in response.Results)
+                retLst.Add(RemoteToNewLocal(lobby));
+            return retLst;
+        }
+        
+        static LocalLobby RemoteToNewLocal(Lobby lobby)
+        {
+            LocalLobby data = new LocalLobby();
+            RemoteToLocal(lobby, data);
+            return data;
         }
         
     }

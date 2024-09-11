@@ -50,6 +50,9 @@ namespace Dino.MultiplayerAsset
         private ServiceRateLimiter _heartBeatCooldown = new ServiceRateLimiter(5, 30);
         private ServiceRateLimiter _updatePlayerCooldown = new ServiceRateLimiter(5, 5f);
         private ServiceRateLimiter _updateLobbyCooldown = new ServiceRateLimiter(5, 5f);
+        ServiceRateLimiter _deleteLobbyCooldown = new ServiceRateLimiter(2, 1f);
+
+        private const int _maxLobbiesToShow = 16;
 
         private Task _heartBeatTask;
 
@@ -418,19 +421,19 @@ namespace Dino.MultiplayerAsset
                     shouldLock = state != LobbyState.Lobby;
                 }
 
-                if (_updateLobbyCooldown.TaskQueued) return;
-                
-                await _updateLobbyCooldown.QueueUntilCooldown();
-                UpdateLobbyOptions updateLobbyOptions = new UpdateLobbyOptions
-                {
-                    Data = dataCurrent,
-                    IsLocked = shouldLock
-                };
-                _currentLobby = await LobbyService.Instance.UpdateLobbyAsync(_currentLobby.Id, updateLobbyOptions);
-                
-                Debug.Log("Lobby Data Updated".SetColor("#F37219") + _currentLobby.Players.Count);
             }
             
+            if (_updateLobbyCooldown.TaskQueued) return;
+
+            await _updateLobbyCooldown.QueueUntilCooldown();
+            
+            UpdateLobbyOptions updateLobbyOptions = new UpdateLobbyOptions 
+            { 
+                Data = dataCurrent, 
+                IsLocked = shouldLock
+            };
+            _currentLobby = await LobbyService.Instance.UpdateLobbyAsync(_currentLobby.Id, updateLobbyOptions);
+            Debug.Log("Lobby Data Updated".SetColor("#F37219") + _currentLobby.Players.Count);
         }
         public async Task<QueryResponse> GetQueryLobbies()
         {
@@ -469,11 +472,35 @@ namespace Dino.MultiplayerAsset
             
         }
 
+        public async Task DeleteLobbyAsync()
+        {
+            if (!InLobby())
+                return;
+            await _deleteLobbyCooldown.QueueUntilCooldown();
+
+            await LobbyService.Instance.DeleteLobbyAsync(_currentLobby.Id);
+        }
+        
+        public async Task<QueryResponse> RetrieveLobbyListAsync()
+        {
+            if (_queryCooldown.TaskQueued)
+                return null;
+            await _queryCooldown.QueueUntilCooldown();
+
+            QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
+            {
+                Count = _maxLobbiesToShow,
+            };
+
+            return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
+        }
+        
 
     #endregion
 
         #region private methods
 
+        // List<QueryFilter> 
         private Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LocalPlayer user)
         {
             Dictionary<string, PlayerDataObject> data = new Dictionary<string, PlayerDataObject>();

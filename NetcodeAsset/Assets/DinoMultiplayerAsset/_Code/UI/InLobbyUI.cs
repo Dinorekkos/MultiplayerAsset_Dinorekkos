@@ -52,7 +52,6 @@ public class InLobbyUI : MonoBehaviour
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged += UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined += UpdatePlayers;
         GameNetworkManager.Instance.LocalLobby.OnUserLeft += OnUserLeft;
-        GameNetworkManager.Instance.LocalLobby.OnUserReadyChanged += OnPlayersReadyChanged;
         GameNetworkManager.Instance.LocalLobby.HostID.onChanged += CheckHost;
     }
     
@@ -61,7 +60,6 @@ public class InLobbyUI : MonoBehaviour
         GameNetworkManager.Instance.LocalLobby.LobbyName.onChanged -= UpdateLobbyName;
         GameNetworkManager.Instance.LocalLobby.OnUserJoined -= UpdatePlayers;
         GameNetworkManager.Instance.LocalLobby.OnUserLeft -= OnUserLeft;
-        GameNetworkManager.Instance.LocalLobby.OnUserReadyChanged -= OnPlayersReadyChanged;
         GameNetworkManager.Instance.LocalLobby.HostID.onChanged -= CheckHost;
     }
     
@@ -109,9 +107,11 @@ public class InLobbyUI : MonoBehaviour
         if(hostID == _localPlayer.ID.Value)
         {
             _startGameButton.gameObject.SetActive(true);
+            _readyButton.gameObject.SetActive(false);
         }
         else
-            _startGameButton.gameObject.SetActive(false);
+            _startGameButton.gameObject.SetActive(false);  
+        
     }
 
     private void UpdateLobbyName(string lobbyName)
@@ -163,9 +163,16 @@ public class InLobbyUI : MonoBehaviour
     }
     private void HandleReady()
     {
-        Debug.Log("Ready Button Clicked + " + _localPlayer.Index.Value);
-        _localLobby.ChangePlayerStatus(_localPlayer.Index.Value, PlayerStatus.Ready);
-        _readyButton.interactable = false;
+        int playerIndex = _localLobby.GetPlayerIndex(_localPlayer.ID.Value);
+        bool isReady = _localLobby.LocalPlayers[playerIndex].UserStatus.Value == PlayerStatus.Ready;
+        
+        if (isReady)
+        {
+            _localLobby.ChangePlayerStatus(playerIndex, PlayerStatus.Lobby);
+            return;
+        }
+        
+        _localLobby.ChangePlayerStatus(playerIndex, PlayerStatus.Ready);
     }
     
     private void LeaveLobby()
