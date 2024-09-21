@@ -63,8 +63,6 @@ public class InLobbyUI : MonoBehaviour
         GameNetworkManager.Instance.LocalLobby.HostID.onChanged -= CheckHost;
     }
     
-
-
     private void InitLobby()
     {
         SubscribeLobbyEvents();
@@ -92,10 +90,6 @@ public class InLobbyUI : MonoBehaviour
         HandlePlayerBanners();
     }
     
-    private void OnPlayersReadyChanged(int index)
-    {
-        HandlePlayerBanners(index);
-    }
     private void OnUserLeft(int index)
     {
         UpdatePlayers();
@@ -158,8 +152,14 @@ public class InLobbyUI : MonoBehaviour
 
     private void GoToGameButton()
     {
-        
-        GameNetworkManager.Instance.GoToGame();
+        //Init Host as ready to start the game
+        GameNetworkManager.Instance.SetLocalUserStatus(PlayerStatus.Ready);
+
+        if (_localLobby.CheckIfAllPlayersReady())
+        {
+            //Check if all players are ready
+            GameNetworkManager.Instance.GoToGame();
+        }
     }
     private void HandleReady()
     {
@@ -168,11 +168,14 @@ public class InLobbyUI : MonoBehaviour
         
         if (isReady)
         {
+            GameNetworkManager.Instance.SetLocalUserStatus(PlayerStatus.Lobby);
             _localLobby.ChangePlayerStatus(playerIndex, PlayerStatus.Lobby);
             return;
         }
         
         _localLobby.ChangePlayerStatus(playerIndex, PlayerStatus.Ready);
+        GameNetworkManager.Instance.SetLocalUserStatus(PlayerStatus.Ready);
+
     }
     
     private void LeaveLobby()

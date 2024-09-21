@@ -114,7 +114,7 @@ namespace Dino.MultiplayerAsset
             };
             _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createLobbyOptions);
             StartHeartBeat();
-
+            
             return _currentLobby;
         }
 

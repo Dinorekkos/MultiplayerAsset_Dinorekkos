@@ -152,6 +152,8 @@ namespace Dino.MultiplayerAsset
         //Only Host needs to listen to this and change state.
         private void OnPlayersReady(int readyCount)
         {
+            Debug.Log("Ready Count: " + readyCount + " - Player Count: " + _localLobby.PlayerCount);
+            
             if (readyCount == _localLobby.PlayerCount && _localLobby.LocalLobbyState.Value != LobbyState.CountDown)
             {
                 _localLobby.LocalLobbyState.Value = LobbyState.CountDown;
@@ -160,6 +162,8 @@ namespace Dino.MultiplayerAsset
             {
                 _localLobby.LocalLobbyState.Value = LobbyState.Lobby;
             }
+            
+            Debug.Log("Local Lobby State: " + _localLobby.LocalLobbyState.Value);
             
             SendLocalLobbyData();
         }
@@ -178,7 +182,7 @@ namespace Dino.MultiplayerAsset
             SetLocalUserStatus(PlayerStatus.Lobby);
         }
 
-        private void SetLocalUserStatus(PlayerStatus playerStatus)
+        public void SetLocalUserStatus(PlayerStatus playerStatus)
         {
             _localUser.UserStatus.Value = playerStatus;
             SendLocalUserData();
@@ -303,6 +307,7 @@ namespace Dino.MultiplayerAsset
                 
                 LobbyConverters.RemoteToLocal(lobby, _localLobby);
                 await CreateLobby();
+                
             }
             catch (LobbyServiceException exception)
             {

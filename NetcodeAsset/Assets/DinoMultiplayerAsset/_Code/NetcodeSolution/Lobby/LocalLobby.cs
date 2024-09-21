@@ -168,7 +168,19 @@ namespace Dino.MultiplayerAsset
             OnUserReadyChanged?.Invoke(readyCount);
         }
         
+        public bool CheckIfAllPlayersReady()
+        {
+            foreach (var player in _localPlayers)
+            {
+                if (player.UserStatus.Value != PlayerStatus.Ready)
+                {
+                    return false;
+                }
+            }
 
+            return true;
+        }
+        
         #endregion
         
     }
