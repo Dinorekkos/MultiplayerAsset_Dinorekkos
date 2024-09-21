@@ -106,7 +106,11 @@ namespace Dino.MultiplayerAsset
         {
             List<LocalLobby> retLst = new List<LocalLobby>();
             foreach (var lobby in response.Results)
+            {
                 retLst.Add(RemoteToNewLocal(lobby));
+            }
+            
+            
             return retLst;
         }
         

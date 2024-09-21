@@ -29,7 +29,7 @@ public class BrowseLobbyUI : MonoBehaviour
         _returnButton.onClick.AddListener(ReturnToInitial);
         _onBrowseLobbies.OnEventRaised += BrowseLobbies;
         _onInitLobby.OnEventRaised += CloseUI;
-        GameNetworkManager.Instance.OnLobbyListChanged += UpdateLobbies;
+         
     }
 
     
@@ -50,7 +50,8 @@ public class BrowseLobbyUI : MonoBehaviour
     }
     private void BrowseLobbies()
     {
-        GameNetworkManager.Instance.BrowseLobbies();
+        GameNetworkManager.Instance.QueryLobbies();
+        UpdateLobbies();
     }
    
     private void ReturnToInitial()

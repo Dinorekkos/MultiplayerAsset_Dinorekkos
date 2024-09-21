@@ -55,7 +55,7 @@ namespace Dino.MultiplayerAsset
         private const int _maxLobbiesToShow = 16;
 
         private Task _heartBeatTask;
-
+        
         #endregion
 
 
@@ -492,7 +492,8 @@ namespace Dino.MultiplayerAsset
                 Count = _maxLobbiesToShow,
             };
 
-            return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
+            var lobbies = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
+            return lobbies;
         }
         
 

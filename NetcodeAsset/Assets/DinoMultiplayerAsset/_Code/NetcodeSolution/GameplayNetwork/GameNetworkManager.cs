@@ -68,7 +68,9 @@ namespace Dino.MultiplayerAsset
         public event Action<ulong> OnClientConnected;
         public event Action<ulong> OnClientDisconnected;
         
-        public event Action OnLobbyListChanged; 
+        // public event Action OnLobbyListChanged; 
+        
+        public event Action OnFinishedNetworkSetup;
         #endregion
 
         
@@ -229,6 +231,8 @@ namespace Dino.MultiplayerAsset
                 await _relayManager.SetRelayClientData(_localLobby);
                 _networkManager.StartClient();
             }
+            
+            OnFinishedNetworkSetup?.Invoke();
         }
 
         private void InitializeNetworkEvents()
@@ -339,25 +343,26 @@ namespace Dino.MultiplayerAsset
             }
         }
         
-        public async void BrowseLobbies()
-        {
-            SetGameState(GameState.JoinMenu);
-            QueryResponse queryResponse = await _lobbyManager.GetQueryLobbies();
-            var lobbies = queryResponse.Results;
-            _lobbyList.Clear();
-            foreach (var lobby in lobbies)
-            {
-                var localLobby = new LocalLobby();
-                LobbyConverters.RemoteToLocal(lobby, localLobby);
-                _lobbyList.CurrentLobbies.Add(lobby.Id, localLobby);
-                Debug.Log("Lobby: " + localLobby.LobbyName.Value);
-            }
-            
-            OnLobbyListChanged?.Invoke();
-        }
+        // public async void BrowseLobbies()
+        // {
+        //     SetGameState(GameState.JoinMenu);
+        //     QueryResponse queryResponse = await _lobbyManager.GetQueryLobbies();
+        //     var lobbies = queryResponse.Results;
+        //     _lobbyList.Clear();
+        //     foreach (var lobby in lobbies)
+        //     {
+        //         var localLobby = new LocalLobby();
+        //         LobbyConverters.RemoteToLocal(lobby, localLobby);
+        //         _lobbyList.CurrentLobbies.Add(lobby.Id, localLobby);
+        //         Debug.Log("Lobby: " + localLobby.LobbyName.Value);
+        //     }
+        //     
+        //     // OnLobbyListChanged?.Invoke();
+        // }
 
         public async void QueryLobbies()
         {
+            SetGameState(GameState.JoinMenu);
             LobbyList.QueryState.Value = LobbyQueryState.Fetching;
             var queryResponse = await _lobbyManager.RetrieveLobbyListAsync();
             
@@ -368,13 +373,13 @@ namespace Dino.MultiplayerAsset
             }
             
             SetCurrentLobbies(LobbyConverters.QueryToLocalList(queryResponse));
-            OnLobbyListChanged?.Invoke();
-            
+            // OnLobbyListChanged?.Invoke();
         }
         
         public void LoadScene(string sceneName)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+            
         }
 
       
@@ -385,9 +390,10 @@ namespace Dino.MultiplayerAsset
         {   
             Debug.Log("Go to Game");
             StartNetworkedGame();
-            LoadScene("GameScene");
-            
-            
+            OnFinishedNetworkSetup += () =>
+            {
+                LoadScene("GameScene");
+            };
         }
         
         
