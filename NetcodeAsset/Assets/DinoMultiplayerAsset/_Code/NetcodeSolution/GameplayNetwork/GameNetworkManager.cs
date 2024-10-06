@@ -138,6 +138,7 @@ namespace Dino.MultiplayerAsset
         {
             _localUser.IsHost.Value = true;
             _localLobby.OnUserReadyChanged = OnPlayersReady;
+            
             try
             {
                 await BindLobby();
@@ -147,6 +148,10 @@ namespace Dino.MultiplayerAsset
                 Console.WriteLine(e);
                 throw;
             }
+            
+            //Set the local user status to ready if the user is the host.
+            HandleHostReadyState();
+            
         }
 
         //Only Host needs to listen to this and change state.
@@ -166,6 +171,13 @@ namespace Dino.MultiplayerAsset
             Debug.Log("Local Lobby State: " + _localLobby.LocalLobbyState.Value);
             
             SendLocalLobbyData();
+        }
+        private void HandleHostReadyState()
+        {
+            if (_localUser.IsHost.Value)
+            {
+                SetLocalUserStatus(PlayerStatus.Ready);
+            }
         }
 
         private async Task BindLobby()
@@ -235,10 +247,10 @@ namespace Dino.MultiplayerAsset
                 await _relayManager.SetRelayClientData(_localLobby);
                 _networkManager.StartClient();
             }
-            
-            OnFinishedNetworkSetup?.Invoke();
-        }
 
+            StartCoroutine(WaitForNetworkManager());
+        }
+        
         private void InitializeNetworkEvents()
         {
             _networkManager.OnClientConnectedCallback += (clientID) =>
@@ -251,6 +263,12 @@ namespace Dino.MultiplayerAsset
             };
         }
         
+        IEnumerator WaitForNetworkManager()
+        {
+            yield return new WaitUntil(() => _relayManager.IsRelayInitialized && _networkManager.IsListening);
+            Debug.Log("Network Manager is ready".SetColor("#4cdeff"));
+            OnFinishedNetworkSetup?.Invoke();
+        }
         void SetCurrentLobbies(IEnumerable<LocalLobby> lobbies)
         {
             var newLobbyDict = new Dictionary<string, LocalLobby>();
@@ -383,12 +401,17 @@ namespace Dino.MultiplayerAsset
         
         public void LoadScene(string sceneName)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+            try
+            { 
+                NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
             
         }
-
-      
-
+        
         #endregion
 
         public void GoToGame()
@@ -397,6 +420,7 @@ namespace Dino.MultiplayerAsset
             StartNetworkedGame();
             OnFinishedNetworkSetup += () =>
             {
+                Debug.Log("Finished Network Setup");
                 LoadScene("GameScene");
             };
         }

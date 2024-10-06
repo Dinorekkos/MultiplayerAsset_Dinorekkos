@@ -102,6 +102,7 @@ public class InLobbyUI : MonoBehaviour
         {
             _startGameButton.gameObject.SetActive(true);
             _readyButton.gameObject.SetActive(false);
+
         }
         else
             _startGameButton.gameObject.SetActive(false);  
@@ -152,11 +153,9 @@ public class InLobbyUI : MonoBehaviour
 
     private void GoToGameButton()
     {
-        //Init Host as ready to start the game
-        GameNetworkManager.Instance.SetLocalUserStatus(PlayerStatus.Ready);
-
         if (_localLobby.CheckIfAllPlayersReady())
         {
+            Debug.Log("All players are ready, going to game");
             //Check if all players are ready
             GameNetworkManager.Instance.GoToGame();
         }

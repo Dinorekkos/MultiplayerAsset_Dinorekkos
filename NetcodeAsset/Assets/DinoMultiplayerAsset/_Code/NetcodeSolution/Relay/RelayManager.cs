@@ -13,6 +13,7 @@ namespace Dino.MultiplayerAsset
 {
     public class RelayManager : IDisposable
     {
+        public bool IsRelayInitialized { get; private set; }
         public async Task AwaitRelayCode(LocalLobby lobby)
         {
             string relayCode = lobby.RelayCode.Value;
@@ -43,6 +44,8 @@ namespace Dino.MultiplayerAsset
             
             transport.SetHostRelayData(AddressFromEndpoint(endpoint), endpoint.Port,
                 allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, isSecure);
+            
+            IsRelayInitialized = true;
         }
         
         
@@ -65,6 +68,8 @@ namespace Dino.MultiplayerAsset
             transport.SetClientRelayData(AddressFromEndpoint(endpoint), endpoint.Port,
                 joinAllocation.AllocationIdBytes, joinAllocation.Key,
                 joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
+            
+            IsRelayInitialized = true;
         }
 
         /// <summary>
