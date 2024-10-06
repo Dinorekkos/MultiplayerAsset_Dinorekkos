@@ -174,6 +174,7 @@ namespace Dino.MultiplayerAsset
             {
                 if (player.UserStatus.Value != PlayerStatus.Ready)
                 {
+                    Debug.Log($"Player {player.DisplayName.Value} is not ready ".SetColor("#F77820"));
                     return false;
                 }
             }

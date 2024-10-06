@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NaughtyAttributes;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
@@ -172,12 +173,35 @@ namespace Dino.MultiplayerAsset
             
             SendLocalLobbyData();
         }
+       
+        [Button]
         private void HandleHostReadyState()
         {
             if (_localUser.IsHost.Value)
             {
-                SetLocalUserStatus(PlayerStatus.Ready);
+                Debug.Log("Host is ready".SetColor("#abff4c"));
+                SetPlayerReady();
             }
+        }
+
+        public void SetPlayerReady()
+        {
+            if (_localUser.UserStatus.Value == PlayerStatus.Ready)
+            {
+                return;
+            }
+            _localLobby.ChangePlayerStatus(_localLobby.GetPlayerIndex(_localUser.ID.Value), PlayerStatus.Ready);
+            SetLocalUserStatus(PlayerStatus.Ready);
+        }
+        
+        public void SetPlayerNotReady()
+        {
+            if (_localUser.UserStatus.Value == PlayerStatus.Lobby)
+            {
+                return;
+            }
+            _localLobby.ChangePlayerStatus(_localLobby.GetPlayerIndex(_localUser.ID.Value), PlayerStatus.Lobby);
+            SetLocalUserStatus(PlayerStatus.Lobby);
         }
 
         private async Task BindLobby()
@@ -424,6 +448,28 @@ namespace Dino.MultiplayerAsset
                 LoadScene("GameScene");
             };
         }
+
+
+        #region Test Methods
+
+        [Button]
+        public void GetPlayerStatus()
+        {
+            Debug.Log("Player Status: " + _localUser.UserStatus.Value);
+        }
+        
+        [Button]
+        public void PlayerStatusInLobby()
+        {
+            int playerIndex = _localLobby.GetPlayerIndex(_localUser.ID.Value);
+            if (playerIndex != -1)
+            {
+                Debug.Log("Player Status: " + _localLobby.GetLocalPlayer(playerIndex).UserStatus.Value);
+            }
+        }
+
+        #endregion
+        
         
         
     }

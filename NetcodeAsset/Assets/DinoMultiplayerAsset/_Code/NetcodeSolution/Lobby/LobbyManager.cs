@@ -433,7 +433,7 @@ namespace Dino.MultiplayerAsset
                 IsLocked = shouldLock
             };
             _currentLobby = await LobbyService.Instance.UpdateLobbyAsync(_currentLobby.Id, updateLobbyOptions);
-            Debug.Log("Lobby Data Updated".SetColor("#F37219") + _currentLobby.Players.Count);
+            Debug.Log("Lobby Data Updated current players count = ".SetColor("#F37219") + _currentLobby.Players.Count);
         }
         public async Task<QueryResponse> GetQueryLobbies()
         {

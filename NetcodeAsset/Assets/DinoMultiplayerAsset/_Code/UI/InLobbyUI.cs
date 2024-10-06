@@ -153,6 +153,7 @@ public class InLobbyUI : MonoBehaviour
 
     private void GoToGameButton()
     {
+        Debug.Log("Dino: Go to game button pressed");
         if (_localLobby.CheckIfAllPlayersReady())
         {
             Debug.Log("All players are ready, going to game");
@@ -167,14 +168,11 @@ public class InLobbyUI : MonoBehaviour
         
         if (isReady)
         {
-            GameNetworkManager.Instance.SetLocalUserStatus(PlayerStatus.Lobby);
-            _localLobby.ChangePlayerStatus(playerIndex, PlayerStatus.Lobby);
+            GameNetworkManager.Instance.SetPlayerNotReady();
             return;
         }
         
-        _localLobby.ChangePlayerStatus(playerIndex, PlayerStatus.Ready);
-        GameNetworkManager.Instance.SetLocalUserStatus(PlayerStatus.Ready);
-
+        GameNetworkManager.Instance.SetPlayerReady();
     }
     
     private void LeaveLobby()
